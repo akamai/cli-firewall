@@ -122,6 +122,27 @@ class fireShield(object):
             getServiceUrl)
         return getServiceResponse
 
+    def listCidr(self, session):
+        """
+        Function to List Enrollments
+
+        Parameters
+        -----------
+        session : <string>
+            An EdgeGrid Auth akamai session object
+
+        Returns
+        -------
+        listCidrRespose : listCidrRespose
+            (listCidrRespose) Object with all details
+        """
+
+        listCidrUrl = 'https://' + self.access_hostname + \
+            '/firewall-rules-manager/v1/cidr-blocks'
+        listCidrResponse = session.get(
+            listCidrUrl)
+        return listCidrResponse
+
     def listSubscriptions(self, session):
         """
         Function to List Enrollments
