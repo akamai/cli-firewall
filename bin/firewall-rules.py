@@ -131,16 +131,23 @@ def cli():
 
     actions["subscribe"] = create_sub_command(
         subparsers, "subscribe",
-        "Scubscribe to the firewall notification list ",
+        "Subscribe to the firewall notification list ",
         [{"name": "serviceName", "help": "Name of the service to be subscribed to within SINGLE quotes"},
          {"name": "serviceId", "help": "ID of the service to be subscribed to"}],
          [{"name": "email", "help": "Email Id of the subscriber"}])
 
     actions["unsubscribe"] = create_sub_command(
         subparsers, "unsubscribe",
-        "Unscubscribe to the firewall notification list ",
+        "Unsubscribe to the firewall notification list ",
         [{"name": "serviceName", "help": "Name of the service to be subscribed to within SINGLE quotes"},
          {"name": "serviceId", "help": "ID of the service to be subscribed to"}],
+          None)
+
+    actions["list_cidrs"] = create_sub_command(
+        subparsers, "list-cidrs",
+        "List the CIDR block ",
+        [{"name": "serviceName", "help": "Name of the service within SINGLE quotes"},
+         {"name": "serviceId", "help": "Id of the service"}],
           None)
 
     actions["list_ss_maps"] = create_sub_command(
@@ -382,6 +389,48 @@ def unsubscribe(args):
     else:
         root_logger.info('There was error in fetching subscription response. Use --debug to know more.')
         root_logger.debug(json.dumps(listServicesResponse.json(), indent=4))
+
+def list_cidrs(args):
+    base_url, session = init_config(args.edgerc, args.section)
+    fireShieldObject = fireShield(base_url)
+    root_logger.info('Fetching the CIDR blocks related information.')
+    list_cidrResponse = fireShieldObject.listCidr(session)
+    #root_logger.info(json.dumps(list_cidrResponse.json(), indent=4))
+    if list_cidrResponse.status_code == 200:
+        #root_logger.info(json.dumps(listServicesResponse.json(), indent=4))
+        table = PrettyTable(['CIDR Block', 'Port', 'Activation Date', 'Status', 'Service Name'])
+        table.align ="l"
+
+        for eachItem in list_cidrResponse.json():
+            rowData = []
+            if args.serviceName:
+                if args.serviceName == eachItem['serviceName']:
+                    rowData.append(str(eachItem['cidr']) + str(eachItem['cidrMask']))
+                    rowData.append(eachItem['port'])
+                    rowData.append(eachItem['effectiveDate'])
+                    rowData.append(eachItem['lastAction'])
+                    rowData.append(eachItem['serviceName'])
+                    table.add_row(rowData)
+            elif args.serviceId:
+                if str(args.serviceId) == str(eachItem['serviceId']):
+                    rowData.append(str(eachItem['cidr']) + str(eachItem['cidrMask']))
+                    rowData.append(eachItem['port'])
+                    rowData.append(eachItem['effectiveDate'])
+                    rowData.append(eachItem['lastAction'])
+                    rowData.append(eachItem['serviceName'])
+                    table.add_row(rowData)
+            else:
+                    rowData.append(str(eachItem['cidr']) + str(eachItem['cidrMask']))
+                    rowData.append(eachItem['port'])
+                    rowData.append(eachItem['effectiveDate'])
+                    rowData.append(eachItem['lastAction'])
+                    rowData.append(eachItem['serviceName'])
+                    table.add_row(rowData)
+
+        root_logger.info(table)
+    else:
+        root_logger.info('There was error in fetching response. Use --debug to know more.')
+        root_logger.debug(json.dumps(list_cidrResponse.json(), indent=4))
 
 def list_ss_maps(args):
     base_url, session = init_config(args.edgerc, args.section)
