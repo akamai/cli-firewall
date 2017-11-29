@@ -30,6 +30,7 @@ import shutil
 import sys
 from prettytable import PrettyTable
 from akamai.edgegrid import EdgeGridAuth, EdgeRc
+import datetime
 
 
 PACKAGE_VERSION = "0.1.0"
@@ -278,16 +279,16 @@ def list_subscriptions(args):
     #root_logger.info(json.dumps(list_subscriptionsResponse.json(), indent=4))
     if list_subscriptionsResponse.status_code == 200:
         #root_logger.info(json.dumps(listServicesResponse.json(), indent=4))
-        table = PrettyTable(['Service ID', 'Service Name', 'Service Description', 'Email', 'Sign-up-Date'])
+        table = PrettyTable(['Sign-up-Date', 'Email', 'Service ID', 'Service Name', 'Service Description'])
         table.align ="l"
 
         for eachItem in list_subscriptionsResponse.json()['subscriptions']:
             rowData = []
+            rowData.append(eachItem['signupDate'])
+            rowData.append(eachItem['email'])
             rowData.append(eachItem['serviceId'])
             rowData.append(eachItem['serviceName'])
             rowData.append(eachItem['description'])
-            rowData.append(eachItem['email'])
-            rowData.append(eachItem['signupDate'])
             table.add_row(rowData)
         root_logger.info(table)
     else:
@@ -405,7 +406,7 @@ def list_cidrs(args):
     #root_logger.info(json.dumps(list_cidrResponse.json(), indent=4))
     if list_cidrResponse.status_code == 200:
         #root_logger.info(json.dumps(listServicesResponse.json(), indent=4))
-        table = PrettyTable(['CIDR Block', 'Port', 'Activation Date', 'Status', 'Service Name'])
+        table = PrettyTable(['CIDR Block', 'Port', 'Activation Date (YYYY-MM-DD)', 'Status', 'Service Name'])
         table.align ="l"
 
         for eachItem in list_cidrResponse.json():
@@ -457,6 +458,7 @@ def list_ss_maps(args):
             ruleName = eachItem['ruleName']
             acknowledgedBy = eachItem['acknowledgedBy']
             acknowledgedOn = eachItem['acknowledgedOn']
+            acknowledgedOn = datetime.datetime.fromtimestamp(acknowledgedOn/1000)
             contacts = ''
             for eachContact in eachItem['contacts']:
                 contacts = eachContact + ' ' + contacts
