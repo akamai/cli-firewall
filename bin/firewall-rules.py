@@ -163,6 +163,13 @@ def cli():
          {"name": "mapId", "help": "ID of the map"}],
           None)
 
+    actions["ack_ss_change"] = create_sub_command(
+        subparsers, "ack-ss-change",
+        "Acknowledge Siteshield map update ",
+        [{"name": "mapName", "help": "Name of the map within SINGLE quotes"},
+         {"name": "mapId", "help": "ID of the map"}],
+          None)
+
     args = parser.parse_args()
 
     if len(sys.argv) <= 1:
@@ -446,7 +453,7 @@ def list_ss_maps(args):
 
         for eachItem in listMapsResponse.json()['siteShieldMaps']:
             rowData = []
-            mapId = eachItem['mcmMapRuleId']
+            mapId = eachItem['id']
             ruleName = eachItem['ruleName']
             acknowledgedBy = eachItem['acknowledgedBy']
             acknowledgedOn = eachItem['acknowledgedOn']
@@ -480,9 +487,6 @@ def list_ss_cidrs(args):
 
     if listMapsResponse.status_code == 200:
         #root_logger.info(json.dumps(listMapsResponse.json(), indent=4))
-        table = PrettyTable(['Map ID', 'Map Name', 'Last Acknowledged By', 'Acknowledge Date', 'Contact Info'])
-        table.align ="l"
-
         mapFound = False
         for eachItem in listMapsResponse.json()['siteShieldMaps']:
             if args.mapName:
@@ -492,7 +496,7 @@ def list_ss_cidrs(args):
                         root_logger.info(eachAddress)
                     mapFound = True
             elif args.mapId:
-                if str(eachItem['mcmMapRuleId']) == str(args.mapId):
+                if str(eachItem['id']) == str(args.mapId):
                     root_logger.info('Current CIDR blocks are: ')
                     for eachAddress in eachItem['currentCidrs']:
                         root_logger.info(eachAddress)
@@ -504,7 +508,50 @@ def list_ss_cidrs(args):
 
     else:
         root_logger.info('There was error in fetching response. Use --debug to know more.')
-        root_logger.debug(json.dumps(listServicesResponse.json(), indent=4))
+        root_logger.debug(json.dumps(listMapsResponse.json(), indent=4))
+
+def ack_ss_change(args):
+    if args.mapId and args.mapName:
+        root_logger.info('You cannot specify both mapId and mapName. Enter any one of them.')
+        exit(-1)
+    if not args.mapId and not args.mapName:
+        root_logger.info('Specify either of mapId or mapName.')
+        exit(-1)
+    base_url, session = init_config(args.edgerc, args.section)
+    fireShieldObject = fireShield(base_url)
+    root_logger.info('Fetching the Map information\n')
+
+    listMapsResponse = fireShieldObject.listMaps(session)
+
+    if listMapsResponse.status_code == 200:
+        #root_logger.info(json.dumps(listMapsResponse.json(), indent=4))
+        mapFound = False
+        for eachItem in listMapsResponse.json()['siteShieldMaps']:
+            if args.mapName:
+                if eachItem['ruleName'] == args.mapName:
+                    mapFound = True
+                    mapId = eachItem['id']
+            elif args.mapId:
+                if str(eachItem['id']) == str(args.mapId):
+                    mapFound = True
+                    mapId = eachItem['id']
+
+        if mapFound is False:
+            root_logger.info('Unable to find the map. Please check the name/Id')
+            exit(-1)
+        else:
+            root_logger.info('Map is valid. Proceeding further. \n')
+            root_logger.info('Trying to acknowledge the Map\n')
+            acknowledgeMapResponse = fireShieldObject.acknowledgeMap(session, mapId)
+            if acknowledgeMapResponse.status_code == 200:
+                root_logger.info('Successfully Acknowledged.')
+            else:
+                root_logger.info('There is some problem in acknowledging.')
+                root_logger.info(json.dumps(acknowledgeMapResponse.json(), indent=4))
+                exit(-1)
+    else:
+        root_logger.info('There was error in fetching response. Use --debug to know more.')
+        root_logger.info(json.dumps(listMapsResponse.json(), indent=4))
 
 def get_prog_name():
     prog = os.path.basename(sys.argv[0])
