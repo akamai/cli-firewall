@@ -184,3 +184,24 @@ class fireShield(object):
         updateSubscriptionsResponse = session.put(
             updateSubscriptionsUrl, data=subscriptionData)
         return updateSubscriptionsResponse
+
+    def acknowledgeMap(self, session, mapId):
+        """
+        Function to Create an Enrollment
+
+        Parameters
+        -----------
+        session : <string>
+            An EdgeGrid Auth akamai session object
+
+        Returns
+        -------
+        acknowledgeMapRespose : acknowledgeMapRespose
+            (acknowledgeMapRespose) Object with all details
+        """
+
+        acknowledgeMapUrl = 'https://' + self.access_hostname + \
+            '/siteshield/v1/maps/' + str(mapId) + '/acknowledge'
+        acknowledgeMapResponse = session.post(
+            acknowledgeMapUrl)
+        return acknowledgeMapResponse
