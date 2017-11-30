@@ -148,24 +148,26 @@ def cli():
         subparsers, "list-cidrs",
         "List the CIDR block ",
         [{"name": "serviceName", "help": "Name of the service within SINGLE quotes"},
-         {"name": "serviceId", "help": "Id of the service"}],
+         {"name": "serviceId", "help": "Id of the service"},
+         {"name": "file", "help": "Name of the file to ouput CIDR blocks"}],
           None)
 
-    actions["list_ss_maps"] = create_sub_command(
-        subparsers, "list-ss-maps",
+    actions["ss_list_maps"] = create_sub_command(
+        subparsers, "ss-list-maps",
         "List the siteshield maps ",
           None,
           None)
 
-    actions["list_ss_cidrs"] = create_sub_command(
-        subparsers, "list-ss-cidrs",
+    actions["ss_list_cidrs"] = create_sub_command(
+        subparsers, "ss-list-cidrs",
         "List the CIDR blocks ",
         [{"name": "mapName", "help": "Name of the map within SINGLE quotes"},
-         {"name": "mapId", "help": "ID of the map"}],
+         {"name": "mapId", "help": "ID of the map"},
+         {"name": "file", "help": "Name of the file to ouput CIDR blocks"}],
           None)
 
-    actions["ack_ss_change"] = create_sub_command(
-        subparsers, "ack-ss-change",
+    actions["ss_ack_change"] = create_sub_command(
+        subparsers, "ss-ack-change",
         "Acknowledge Siteshield map update ",
         [{"name": "mapName", "help": "Name of the map within SINGLE quotes"},
          {"name": "mapId", "help": "ID of the map"}],
@@ -414,35 +416,55 @@ def list_cidrs(args):
         if len(list_cidrResponse.json()) == 0:
             root_logger.info('No subscriptions exist...')
             exit (-1)
+
+        if args.file:
+            root_logger.info('\nWrting the CIDR block information to file ' + args.file + '\n')
+            if os.path.exists(args.file):
+                os.remove(args.file)
+
         for eachItem in list_cidrResponse.json():
             rowData = []
             if args.serviceName:
                 if args.serviceName == eachItem['serviceName']:
-                    rowData.append(eachItem['serviceName'])
-                    rowData.append(str(eachItem['cidr']) + str(eachItem['cidrMask']))
-                    rowData.append(eachItem['port'])
-                    rowData.append(eachItem['effectiveDate'])
-                    table.add_row(rowData)
+                    if not args.file:
+                        rowData.append(eachItem['serviceName'])
+                        rowData.append(str(eachItem['cidr']) + str(eachItem['cidrMask']))
+                        rowData.append(eachItem['port'])
+                        rowData.append(eachItem['effectiveDate'])
+                        table.add_row(rowData)
+                    else:
+                        with open(args.file,'a') as fileHandler:
+                            fileHandler.write(str(eachItem['cidr']) + str(eachItem['cidrMask']) + '\n')
             elif args.serviceId:
                 if str(args.serviceId) == str(eachItem['serviceId']):
-                    rowData.append(eachItem['serviceName'])
-                    rowData.append(str(eachItem['cidr']) + str(eachItem['cidrMask']))
-                    rowData.append(eachItem['port'])
-                    rowData.append(eachItem['effectiveDate'])
-                    table.add_row(rowData)
+                    if not args.file:
+                        rowData.append(eachItem['serviceName'])
+                        rowData.append(str(eachItem['cidr']) + str(eachItem['cidrMask']))
+                        rowData.append(eachItem['port'])
+                        rowData.append(eachItem['effectiveDate'])
+                        table.add_row(rowData)
+                    else:
+                        with open(args.file,'a') as fileHandler:
+                            fileHandler.write(str(eachItem['cidr']) + str(eachItem['cidrMask']) + '\n')
             else:
+                if not args.file:
                     rowData.append(eachItem['serviceName'])
                     rowData.append(str(eachItem['cidr']) + str(eachItem['cidrMask']))
                     rowData.append(eachItem['port'])
                     rowData.append(eachItem['effectiveDate'])
                     table.add_row(rowData)
-
-        root_logger.info(table)
+                else:
+                    with open(args.file,'a') as fileHandler:
+                        fileHandler.write(str(eachItem['cidr']) + str(eachItem['cidrMask']) + '\n')
+        if not args.file:
+            root_logger.info(table)
+        else:
+            pass
     else:
         root_logger.info('There was error in fetching response. Use --debug to know more.')
         root_logger.debug(json.dumps(list_cidrResponse.json(), indent=4))
 
-def list_ss_maps(args):
+def ss_list_maps(args):
     base_url, session = init_config(args.edgerc, args.section)
     fireShieldObject = fireShield(base_url)
     root_logger.info('Fetching Siteshield Maps...')
@@ -451,7 +473,7 @@ def list_ss_maps(args):
 
     if listMapsResponse.status_code == 200:
         #root_logger.info(json.dumps(listMapsResponse.json(), indent=4))
-        table = PrettyTable(['Map ID', 'Map Name', 'Last Acknowledged By', 'Acknowledge Date', 'Contact Info'])
+        table = PrettyTable(['Map ID', 'Map Name', 'Last Acknowledged By', 'Acknowledge Date', 'Contact Info', 'Status'])
         table.align ="l"
 
         if len(listMapsResponse.json()['siteShieldMaps']) == 0:
@@ -463,7 +485,7 @@ def list_ss_maps(args):
             ruleName = eachItem['ruleName']
             acknowledgedBy = eachItem['acknowledgedBy']
             acknowledgedOn = eachItem['acknowledgedOn']
-            acknowledgedOn = datetime.datetime.fromtimestamp(acknowledgedOn/1000)
+            acknowledgedOn = '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.fromtimestamp(acknowledgedOn/1000))
             contacts = ''
             for eachContact in eachItem['contacts']:
                 contacts = eachContact + ' ' + contacts
@@ -472,6 +494,11 @@ def list_ss_maps(args):
             rowData.append(acknowledgedBy)
             rowData.append(acknowledgedOn)
             rowData.append(contacts)
+            if eachItem['acknowledged'] is False:
+                status = 'UPDATES PENDING'
+            else:
+                status = 'NO UPDATES PENDING'
+            rowData.append(status)
 
             table.add_row(rowData)
         root_logger.info(table)
@@ -479,7 +506,7 @@ def list_ss_maps(args):
         root_logger.info('There was error in fetching response. Use --debug to know more.')
         root_logger.debug(json.dumps(listServicesResponse.json(), indent=4))
 
-def list_ss_cidrs(args):
+def ss_list_cidrs(args):
     if args.mapId and args.mapName:
         root_logger.info('You cannot specify both mapId and mapName. Enter any one of them.')
         exit(-1)
@@ -489,6 +516,11 @@ def list_ss_cidrs(args):
     base_url, session = init_config(args.edgerc, args.section)
     fireShieldObject = fireShield(base_url)
     root_logger.info('Fetching Siteshield CIDR blocks...\n')
+
+    if args.file:
+        root_logger.info('\nWrting the CIDR block information to file ' + args.file + '\n')
+        if os.path.exists(args.file):
+            os.remove(args.file)
 
     listMapsResponse = fireShieldObject.listMaps(session)
 
@@ -500,13 +532,21 @@ def list_ss_cidrs(args):
                 if eachItem['ruleName'] == args.mapName:
                     #root_logger.info('Current CIDR blocks are: ')
                     for eachAddress in eachItem['currentCidrs']:
-                        root_logger.info(eachAddress)
+                        if not args.file:
+                            root_logger.info(eachAddress)
+                        else:
+                            with open(args.file,'a') as fileHandler:
+                                fileHandler.write(str(eachAddress) + '\n')
                     mapFound = True
             elif args.mapId:
                 if str(eachItem['id']) == str(args.mapId):
                     #root_logger.info('Current CIDR blocks are: ')
                     for eachAddress in eachItem['currentCidrs']:
-                        root_logger.info(eachAddress)
+                        if not args.file:
+                            root_logger.info(eachAddress)
+                        else:
+                            with open(args.file,'a') as fileHandler:
+                                fileHandler.write(str(eachAddress) + '\n')
                     mapFound = True
 
         if mapFound is False:
@@ -517,7 +557,7 @@ def list_ss_cidrs(args):
         root_logger.info('There was error in fetching response. Use --debug to know more.')
         root_logger.debug(json.dumps(listMapsResponse.json(), indent=4))
 
-def ack_ss_change(args):
+def ss_ack_change(args):
     if args.mapId and args.mapName:
         root_logger.info('You cannot specify both mapId and mapName. Enter any one of them.')
         exit(-1)
