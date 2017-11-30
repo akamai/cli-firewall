@@ -473,7 +473,7 @@ def ss_list_maps(args):
 
     if listMapsResponse.status_code == 200:
         #root_logger.info(json.dumps(listMapsResponse.json(), indent=4))
-        table = PrettyTable(['Map ID', 'Map Name', 'Last Acknowledged By', 'Acknowledge Date', 'Contact Info', 'Status'])
+        table = PrettyTable(['Map ID', 'Map Name', 'Status', 'Last Acknowledged By', 'Acknowledge Date', 'Contact Info'])
         table.align ="l"
 
         if len(listMapsResponse.json()['siteShieldMaps']) == 0:
@@ -481,6 +481,11 @@ def ss_list_maps(args):
             exit(-1)
         for eachItem in listMapsResponse.json()['siteShieldMaps']:
             rowData = []
+            if eachItem['acknowledged'] is False:
+                status = 'UPDATES PENDING'
+            else:
+                status = 'Up-To-Date'
+
             mapId = eachItem['id']
             ruleName = eachItem['ruleName']
             acknowledgedBy = eachItem['acknowledgedBy']
@@ -491,14 +496,10 @@ def ss_list_maps(args):
                 contacts = eachContact + ' ' + contacts
             rowData.append(mapId)
             rowData.append(ruleName)
+            rowData.append(status)
             rowData.append(acknowledgedBy)
             rowData.append(acknowledgedOn)
             rowData.append(contacts)
-            if eachItem['acknowledged'] is False:
-                status = 'UPDATES PENDING'
-            else:
-                status = 'NO UPDATES PENDING'
-            rowData.append(status)
 
             table.add_row(rowData)
         root_logger.info(table)
