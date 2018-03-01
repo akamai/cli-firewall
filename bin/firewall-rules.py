@@ -19,14 +19,11 @@ Initiators: vbhat@akamai.com, aetsai@akamai.com, mkilmer@akamai.com
 """
 
 import json
-from akamai.edgegrid import EdgeGridAuth
 from firewallruleswrapper import fireShield
 import argparse
-import configparser
 import requests
 import os
 import logging
-import shutil
 import sys
 from prettytable import PrettyTable
 from akamai.edgegrid import EdgeGridAuth, EdgeRc
@@ -188,6 +185,11 @@ def cli():
             parser.print_help()
         return 0
 
+    # Override log level if user wants to run in debug mode
+    # Set Log Level to DEBUG, INFO, WARNING, ERROR, CRITICAL
+    if args.debug:
+        root_logger.setLevel(logging.DEBUG)
+
     return getattr(sys.modules[__name__], args.command.replace("-", "_"))(args)
 
 def create_sub_command(
@@ -244,10 +246,7 @@ def create_sub_command(
 
     return action
 
-# Override log level if user wants to run in debug mode
-# Set Log Level to DEBUG, INFO, WARNING, ERROR, CRITICAL
-'''if args.debug:
-    root_logger.setLevel(logging.DEBUG)'''
+
 
 def list_services(args):
     base_url, session = init_config(args.edgerc, args.section)

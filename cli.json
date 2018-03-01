@@ -1,0 +1,13 @@
+{
+  "requirements": {
+    "python": "3.0.0"
+  },
+  "commands": [
+    {
+      "name": "firewall-rules",
+      "aliases": ["firewall"],
+      "version": "0.1.0",
+      "description": "Access details of maps, subscriptions, firewall notification lists and SS Maps"
+    }
+  ]
+}
