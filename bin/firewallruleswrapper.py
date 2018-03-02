@@ -17,8 +17,7 @@ class fireShield(object):
     def __init__(self, access_hostname):
         self.access_hostname = access_hostname
 
-
-    def listMaps(self, session):
+    def list_maps(self, session):
         """
         Function to List Enrollments
 
@@ -59,7 +58,7 @@ class fireShield(object):
         getMapResponse = session.get(getMapUrl)
         return getMapResponse
 
-    def acknowledgeMap(self, session, mapId):
+    def acknowledge_map(self, session, mapId):
         """
         Function to Create an Enrollment
 
@@ -80,7 +79,7 @@ class fireShield(object):
             acknowledgeMapUrl)
         return acknowledgeMapResponse
 
-    def listServices(self, session):
+    def list_services(self, session):
         """
         Function to List Enrollments
 
@@ -122,7 +121,7 @@ class fireShield(object):
             getServiceUrl)
         return getServiceResponse
 
-    def listCidr(self, session):
+    def list_cidr(self, session):
         """
         Function to List Enrollments
 
@@ -143,7 +142,7 @@ class fireShield(object):
             listCidrUrl)
         return listCidrResponse
 
-    def listSubscriptions(self, session):
+    def list_subscriptions(self, session):
         """
         Function to List Enrollments
 
@@ -164,7 +163,7 @@ class fireShield(object):
             listSubscriptionsUrl)
         return listSubscriptionsResponse
 
-    def updateSubscriptions(self, session, subscriptionData):
+    def update_subscriptions(self, session, subscriptionData):
         """
         Function to Create an Enrollment
 
@@ -185,7 +184,7 @@ class fireShield(object):
             updateSubscriptionsUrl, data=subscriptionData)
         return updateSubscriptionsResponse
 
-    def acknowledgeMap(self, session, mapId):
+    def acknowledge_map(self, session, mapId):
         """
         Function to Create an Enrollment
 
