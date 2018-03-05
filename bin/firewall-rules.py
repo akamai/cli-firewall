@@ -613,10 +613,10 @@ def ss_list_cidrs(args):
 def ss_ack_change(args):
     if args.map_id and args.map_name:
         root_logger.info(
-            'You cannot specify both mapId and mapName. Enter any one of them.')
+            'You cannot specify both map-id and map-name. Enter any one of them.')
         exit(-1)
     if not args.map_id and not args.map_name:
-        root_logger.info('Specify either of mapId or mapName.')
+        root_logger.info('Specify either of map-id or map-name.')
         exit(-1)
     base_url, session = init_config(args.edgerc, args.section)
     fire_shield_object = fireShield(base_url)
@@ -642,18 +642,38 @@ def ss_ack_change(args):
                 'Unable to find the map. Please check the name/Id')
             exit(-1)
         else:
-            root_logger.info('Acknowledge SiteShield map...\n')
-            acknowledge_mapResponse = fire_shield_object.acknowledge_map(
-                session, mapId)
-            if acknowledge_mapResponse.status_code == 200:
-                root_logger.info('Successfully acknowledged!')
+            #Check whether there is some update to ack
+            update_pending = 0
+            list_maps_response = fire_shield_object.list_maps(session)
+
+            if list_maps_response.status_code == 200:
+                if len(list_maps_response.json()['siteShieldMaps']) == 0:
+                    root_logger.info('No Siteshield maps found...')
+                    exit(-1)
+                for eachItem in list_maps_response.json()['siteShieldMaps']:
+                    if eachItem['acknowledged'] is False:
+                        status = 'UPDATES PENDING'
+                        update_pending = 1
+                    else:
+                        status = 'Up-To-Date'
+                        update_pending = 0
+                        
+            if update_pending == 1:
+                root_logger.info('Acknowledging SiteShield map...\n')
+                acknowledge_mapResponse = fire_shield_object.acknowledge_map(
+                    session, mapId)
+                if acknowledge_mapResponse.status_code == 200:
+                    root_logger.info('Successfully acknowledged!')
+                else:
+                    root_logger.info('Unknown error: Acknowledgement unsuccessful')
+                    root_logger.info(
+                        json.dumps(
+                            acknowledge_mapResponse.json(),
+                            indent=4))
+                    exit(-1)
             else:
-                root_logger.info('Unknown error: Acknowledgement unsuccessful')
-                root_logger.info(
-                    json.dumps(
-                        acknowledge_mapResponse.json(),
-                        indent=4))
-                exit(-1)
+                #There was nothing to Acknowledge
+                root_logger.info('There is no update to be Acknowledged.')
     else:
         root_logger.info(
             'There was error in fetching response. Use --debug to know more.')
