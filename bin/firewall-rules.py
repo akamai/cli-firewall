@@ -657,7 +657,11 @@ def ss_ack_change(args):
                     else:
                         status = 'Up-To-Date'
                         update_pending = 0
-                        
+            else:
+                root_logger.info(
+                    'There was error in fetching list_maps_response. Use --debug to know more.')
+                root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+
             if update_pending == 1:
                 root_logger.info('Acknowledging SiteShield map...\n')
                 acknowledge_mapResponse = fire_shield_object.acknowledge_map(
