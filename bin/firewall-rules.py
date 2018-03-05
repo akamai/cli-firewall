@@ -130,22 +130,22 @@ def cli():
     actions["subscribe"] = create_sub_command(
         subparsers, "subscribe",
         "Subscribe to the firewall notification list ",
-        [{"name": "serviceName", "help": "Name of the service to be subscribed to within SINGLE quotes"},
-         {"name": "serviceId", "help": "ID of the service to be subscribed to"}],
+        [{"name": "service-name", "help": "Name of the service to be subscribed to within SINGLE quotes"},
+         {"name": "service-id", "help": "ID of the service to be subscribed to"}],
         [{"name": "email", "help": "Email Id of the subscriber"}])
 
     actions["unsubscribe"] = create_sub_command(
         subparsers, "unsubscribe",
         "Unsubscribe to the firewall notification list ",
-        [{"name": "serviceName", "help": "Name of the service to be subscribed to within SINGLE quotes"},
-         {"name": "serviceId", "help": "ID of the service to be subscribed to"}],
+        [{"name": "service-name", "help": "Name of the service to be subscribed to within SINGLE quotes"},
+         {"name": "service-id", "help": "ID of the service to be subscribed to"}],
         None)
 
     actions["list_cidrs"] = create_sub_command(
         subparsers, "list-cidrs",
         "List the CIDR block ",
-        [{"name": "serviceName", "help": "Name of the service within SINGLE quotes"},
-         {"name": "serviceId", "help": "Id of the service"},
+        [{"name": "service-name", "help": "Name of the service within SINGLE quotes"},
+         {"name": "service-id", "help": "Id of the service"},
          {"name": "file", "help": "Name of the file to ouput CIDR blocks"}],
         None)
 
@@ -158,16 +158,16 @@ def cli():
     actions["ss_list_cidrs"] = create_sub_command(
         subparsers, "ss-list-cidrs",
         "List the CIDR blocks ",
-        [{"name": "mapName", "help": "Name of the map within SINGLE quotes"},
-         {"name": "mapId", "help": "ID of the map"},
+        [{"name": "map-name", "help": "Name of the map within SINGLE quotes"},
+         {"name": "map-id", "help": "ID of the map"},
          {"name": "file", "help": "Name of the file to ouput CIDR blocks"}],
         None)
 
     actions["ss_ack_change"] = create_sub_command(
         subparsers, "ss-ack-change",
         "Acknowledge Siteshield map update ",
-        [{"name": "mapName", "help": "Name of the map within SINGLE quotes"},
-         {"name": "mapId", "help": "ID of the map"}],
+        [{"name": "map-name", "help": "Name of the map within SINGLE quotes"},
+         {"name": "map-id", "help": "ID of the map"}],
         None)
 
     args = parser.parse_args()
@@ -216,7 +216,7 @@ def create_sub_command(
         for arg in optional_arguments:
             name = arg["name"]
             del arg["name"]
-            if name == 'force' or name == 'showExpiration':
+            if name == 'force':
                 optional.add_argument(
                     "--" + name,
                     required=False,
@@ -250,15 +250,15 @@ def create_sub_command(
 
 def list_services(args):
     base_url, session = init_config(args.edgerc, args.section)
-    fireShieldObject = fireShield(base_url)
-    list_servicesResponse = fireShieldObject.list_services(session)
-    if list_servicesResponse.status_code == 200:
-        #root_logger.info(json.dumps(list_servicesResponse.json(), indent=4))
+    fire_shield_object = fireShield(base_url)
+    list_services_response = fire_shield_object.list_services(session)
+    if list_services_response.status_code == 200:
+        #root_logger.info(json.dumps(list_services_response.json(), indent=4))
         table = PrettyTable(
             ['Service ID', 'Service Name', 'Service Description'])
         table.align = "l"
 
-        for eachItem in list_servicesResponse.json():
+        for eachItem in list_services_response.json():
             rowData = []
             serviceId = eachItem['serviceId']
             serviceName = eachItem['serviceName']
@@ -271,25 +271,25 @@ def list_services(args):
     else:
         root_logger.info(
             'There was error in fetching response. Use --debug to know more.')
-        root_logger.debug(json.dumps(list_servicesResponse.json(), indent=4))
+        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
 
 def list_subscriptions(args):
     base_url, session = init_config(args.edgerc, args.section)
-    fireShieldObject = fireShield(base_url)
-    list_subscriptionsResponse = fireShieldObject.listSubscriptions(session)
-    #root_logger.info(json.dumps(list_subscriptionsResponse.json(), indent=4))
-    if list_subscriptionsResponse.status_code == 200:
-        if len(list_subscriptionsResponse.json()['subscriptions']) == 0:
+    fire_shield_object = fireShield(base_url)
+    list_subscriptions_response = fire_shield_object.list_subscriptions(session)
+    #root_logger.info(json.dumps(list_subscriptions_response.json(), indent=4))
+    if list_subscriptions_response.status_code == 200:
+        if len(list_subscriptions_response.json()['subscriptions']) == 0:
             root_logger.info('No subscriptions found.')
             exit(-1)
 
-        #root_logger.info(json.dumps(list_servicesResponse.json(), indent=4))
+        #root_logger.info(json.dumps(list_services_response.json(), indent=4))
         table = PrettyTable(
             ['Sign-up-Date', 'Email', 'Service ID', 'Service Name', 'Service Description'])
         table.align = "l"
 
-        for eachItem in list_subscriptionsResponse.json()['subscriptions']:
+        for eachItem in list_subscriptions_response.json()['subscriptions']:
             rowData = []
             rowData.append(eachItem['signupDate'])
             rowData.append(eachItem['email'])
@@ -301,40 +301,40 @@ def list_subscriptions(args):
     else:
         root_logger.info(
             'There was error in fetching response. Use --debug to know more.')
-        root_logger.debug(json.dumps(list_servicesResponse.json(), indent=4))
+        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
 
 def subscribe(args):
-    if args.serviceId and args.serviceName:
+    if args.service_id and args.service_name:
         root_logger.info(
-            'You cannot specify both serviceId and serviceName. Enter any one of them.')
+            'You cannot specify both service-id and service-name. Enter any one of them.')
         exit(-1)
-    if not args.serviceId and not args.serviceName:
-        root_logger.info('Specify either of serviceId or serviceName.')
+    if not args.service_id and not args.service_name:
+        root_logger.info('Specify either of service-id or service-name.')
         exit(-1)
 
     base_url, session = init_config(args.edgerc, args.section)
-    fireShieldObject = fireShield(base_url)
+    fire_shield_object = fireShield(base_url)
     root_logger.info('Validating service name...')
 
     validService = False
-    list_servicesResponse = fireShieldObject.list_services(session)
-    if list_servicesResponse.status_code == 200:
-        for eachItem in list_servicesResponse.json():
-            if args.serviceId:
+    list_services_response = fire_shield_object.list_services(session)
+    if list_services_response.status_code == 200:
+        for eachItem in list_services_response.json():
+            if args.service_id:
                 if int(args.serviceId) == int(eachItem['serviceId']):
                     validService = True
                     serviceId = args.serviceId
                     break
-            if args.serviceName:
-                if args.serviceName == eachItem['serviceName']:
+            if args.service_name:
+                if args.service_name == eachItem['serviceName']:
                     validService = True
                     serviceId = eachItem['serviceId']
                     break
     else:
         root_logger.info(
             'There was error in fetching services response. Use --debug to know more.')
-        root_logger.debug(json.dumps(list_servicesResponse.json(), indent=4))
+        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
     if validService is False:
         root_logger.info(
@@ -342,17 +342,17 @@ def subscribe(args):
         exit(-1)
     else:
         root_logger.info('Updating current subscription...\n')
-        list_subscriptionsResponse = fireShieldObject.listSubscriptions(
+        list_subscriptions_response = fire_shield_object.list_subscriptions(
             session)
-        if list_subscriptionsResponse.status_code == 200:
+        if list_subscriptions_response.status_code == 200:
             # Proceed to update the subscriptions
             newSubscription = {}
             newSubscription['email'] = args.email
             newSubscription['serviceId'] = int(serviceId)
-            subscriptionData = list_subscriptionsResponse.json()
+            subscriptionData = list_subscriptions_response.json()
             subscriptionData['subscriptions'].append(newSubscription)
             #root_logger.info(json.dumps(subscriptionData, indent=4))
-            update_subscriptionsRespose = fireShieldObject.update_subscriptions(
+            update_subscriptionsRespose = fire_shield_object.update_subscriptions(
                 session, json.dumps(subscriptionData))
             if update_subscriptionsRespose.status_code == 200:
                 root_logger.info('Subscription updated successfully!\n')
@@ -366,39 +366,39 @@ def subscribe(args):
                 'There was error in fetching subscription response. Use --debug to know more.')
             root_logger.debug(
                 json.dumps(
-                    list_servicesResponse.json(),
+                    list_services_response.json(),
                     indent=4))
 
 
 def unsubscribe(args):
-    if args.serviceId and args.serviceName:
+    if args.service_id and args.service_name:
         root_logger.info(
-            'You cannot specify both serviceId and serviceName. Enter any one of them.')
+            'You cannot specify both service-id and service-name. Enter any one of them.')
         exit(-1)
-    if not args.serviceId and not args.serviceName:
-        root_logger.info('Specify either of serviceId or serviceName.')
+    if not args.service_id and not args.service_name:
+        root_logger.info('Specify either of service-id or service-name.')
         exit(-1)
 
     base_url, session = init_config(args.edgerc, args.section)
-    fireShieldObject = fireShield(base_url)
+    fire_shield_object = fireShield(base_url)
     root_logger.info('Validating service name...')
 
-    list_subscriptionsResponse = fireShieldObject.listSubscriptions(session)
+    list_subscriptions_response = fire_shield_object.list_subscriptions(session)
     validService = False
-    if list_subscriptionsResponse.status_code == 200:
-        subscriptionData = list_subscriptionsResponse.json()
+    if list_subscriptions_response.status_code == 200:
+        subscriptionData = list_subscriptions_response.json()
 
         # Using Index to iterate and delete the item from list
         index = 0
         for everySubscription in subscriptionData['subscriptions']:
-            if args.serviceId:
-                if int(args.serviceId) == int(everySubscription['serviceId']):
+            if args.service_id:
+                if int(args.service_id) == int(everySubscription['serviceId']):
                     validService = True
                     serviceName = everySubscription['serviceName']
                     del subscriptionData['subscriptions'][index]
                     break
-            if args.serviceName:
-                if args.serviceName == everySubscription['serviceName']:
+            if args.service_name:
+                if args.service_name == everySubscription['serviceName']:
                     validService = True
                     serviceName = everySubscription['serviceName']
                     del subscriptionData['subscriptions'][index]
@@ -408,7 +408,7 @@ def unsubscribe(args):
         #root_logger.info(json.dumps(subscriptionData, indent=4))
         if validService is True:
             #root_logger.info('Updating the subscription by unsubscribing to: ' + serviceName)
-            update_subscriptionsRespose = fireShieldObject.update_subscriptions(
+            update_subscriptionsRespose = fire_shield_object.update_subscriptions(
                 session, json.dumps(subscriptionData))
             if update_subscriptionsRespose.status_code == 200:
                 root_logger.info('Subscription updated successfully!\n')
@@ -424,17 +424,17 @@ def unsubscribe(args):
     else:
         root_logger.info(
             'There was error in fetching subscription response. Use --debug to know more.')
-        root_logger.debug(json.dumps(list_servicesResponse.json(), indent=4))
+        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
 
 def list_cidrs(args):
     base_url, session = init_config(args.edgerc, args.section)
-    fireShieldObject = fireShield(base_url)
+    fire_shield_object = fireShield(base_url)
     root_logger.info('Fetching CIDR blocks...')
-    list_cidrResponse = fireShieldObject.list_cidr(session)
+    list_cidrResponse = fire_shield_object.list_cidr(session)
     #root_logger.info(json.dumps(list_cidrResponse.json(), indent=4))
     if list_cidrResponse.status_code == 200:
-        #root_logger.info(json.dumps(list_servicesResponse.json(), indent=4))
+        #root_logger.info(json.dumps(list_services_response.json(), indent=4))
         table = PrettyTable(
             ['Service Name', 'CIDR Block', 'Port', 'Activation Date'])
         table.align = "l"
@@ -453,8 +453,8 @@ def list_cidrs(args):
 
         for eachItem in list_cidrResponse.json():
             rowData = []
-            if args.serviceName:
-                if args.serviceName == eachItem['serviceName']:
+            if args.service_name:
+                if args.service_name == eachItem['serviceName']:
                     if not args.file:
                         rowData.append(eachItem['serviceName'])
                         rowData.append(
@@ -466,8 +466,8 @@ def list_cidrs(args):
                         with open(args.file, 'a') as fileHandler:
                             fileHandler.write(
                                 str(eachItem['cidr']) + str(eachItem['cidrMask']) + '\n')
-            elif args.serviceId:
-                if str(args.serviceId) == str(eachItem['serviceId']):
+            elif args.service_id:
+                if str(args.service_id) == str(eachItem['serviceId']):
                     if not args.file:
                         rowData.append(eachItem['serviceName'])
                         rowData.append(
@@ -503,13 +503,13 @@ def list_cidrs(args):
 
 def ss_list_maps(args):
     base_url, session = init_config(args.edgerc, args.section)
-    fireShieldObject = fireShield(base_url)
+    fire_shield_object = fireShield(base_url)
     root_logger.info('Fetching Siteshield Maps...')
 
-    list_mapsResponse = fireShieldObject.list_maps(session)
+    list_maps_response = fire_shield_object.list_maps(session)
 
-    if list_mapsResponse.status_code == 200:
-        #root_logger.info(json.dumps(list_mapsResponse.json(), indent=4))
+    if list_maps_response.status_code == 200:
+        #root_logger.info(json.dumps(list_maps_response.json(), indent=4))
         table = PrettyTable(['Map ID',
                              'Map Name',
                              'Status',
@@ -518,10 +518,10 @@ def ss_list_maps(args):
                              'Contact Info'])
         table.align = "l"
 
-        if len(list_mapsResponse.json()['siteShieldMaps']) == 0:
+        if len(list_maps_response.json()['siteShieldMaps']) == 0:
             root_logger.info('No Siteshield maps found...')
             exit(-1)
-        for eachItem in list_mapsResponse.json()['siteShieldMaps']:
+        for eachItem in list_maps_response.json()['siteShieldMaps']:
             rowData = []
             if eachItem['acknowledged'] is False:
                 status = 'UPDATES PENDING'
@@ -549,19 +549,19 @@ def ss_list_maps(args):
     else:
         root_logger.info(
             'There was error in fetching response. Use --debug to know more.')
-        root_logger.debug(json.dumps(list_servicesResponse.json(), indent=4))
+        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
 
 def ss_list_cidrs(args):
-    if args.mapId and args.mapName:
+    if args.map_id and args.map_name:
         root_logger.info(
-            'You cannot specify both mapId and mapName. Enter any one of them.')
+            'You cannot specify both map-id and map-name. Enter any one of them.')
         exit(-1)
-    if not args.mapId and not args.mapName:
-        root_logger.info('Specify either of mapId or mapName.')
+    if not args.map_id and not args.map_name:
+        root_logger.info('Specify either of map-id or map-name.')
         exit(-1)
     base_url, session = init_config(args.edgerc, args.section)
-    fireShieldObject = fireShield(base_url)
+    fire_shield_object = fireShield(base_url)
     root_logger.info('Fetching Siteshield CIDR blocks...\n')
 
     if args.file:
@@ -572,14 +572,14 @@ def ss_list_cidrs(args):
         if os.path.exists(args.file):
             os.remove(args.file)
 
-    list_mapsResponse = fireShieldObject.list_maps(session)
+    list_maps_response = fire_shield_object.list_maps(session)
 
-    if list_mapsResponse.status_code == 200:
-        #root_logger.info(json.dumps(list_mapsResponse.json(), indent=4))
+    if list_maps_response.status_code == 200:
+        #root_logger.info(json.dumps(list_maps_response.json(), indent=4))
         mapFound = False
-        for eachItem in list_mapsResponse.json()['siteShieldMaps']:
-            if args.mapName:
-                if eachItem['ruleName'] == args.mapName:
+        for eachItem in list_maps_response.json()['siteShieldMaps']:
+            if args.map_name:
+                if eachItem['ruleName'] == args.map_name:
                     #root_logger.info('Current CIDR blocks are: ')
                     for eachAddress in eachItem['currentCidrs']:
                         if not args.file:
@@ -588,8 +588,8 @@ def ss_list_cidrs(args):
                             with open(args.file, 'a') as fileHandler:
                                 fileHandler.write(str(eachAddress) + '\n')
                     mapFound = True
-            elif args.mapId:
-                if str(eachItem['id']) == str(args.mapId):
+            elif args.map_id:
+                if str(eachItem['id']) == str(args.map_id):
                     #root_logger.info('Current CIDR blocks are: ')
                     for eachAddress in eachItem['currentCidrs']:
                         if not args.file:
@@ -607,33 +607,33 @@ def ss_list_cidrs(args):
     else:
         root_logger.info(
             'There was error in fetching response. Use --debug to know more.')
-        root_logger.debug(json.dumps(list_mapsResponse.json(), indent=4))
+        root_logger.debug(json.dumps(list_maps_response.json(), indent=4))
 
 
 def ss_ack_change(args):
-    if args.mapId and args.mapName:
+    if args.map_id and args.map_name:
         root_logger.info(
             'You cannot specify both mapId and mapName. Enter any one of them.')
         exit(-1)
-    if not args.mapId and not args.mapName:
+    if not args.map_id and not args.map_name:
         root_logger.info('Specify either of mapId or mapName.')
         exit(-1)
     base_url, session = init_config(args.edgerc, args.section)
-    fireShieldObject = fireShield(base_url)
+    fire_shield_object = fireShield(base_url)
     root_logger.info('Fetching Siteshield maps...\n')
 
-    list_mapsResponse = fireShieldObject.list_maps(session)
+    list_maps_response = fire_shield_object.list_maps(session)
 
-    if list_mapsResponse.status_code == 200:
-        #root_logger.info(json.dumps(list_mapsResponse.json(), indent=4))
+    if list_maps_response.status_code == 200:
+        #root_logger.info(json.dumps(list_maps_response.json(), indent=4))
         mapFound = False
-        for eachItem in list_mapsResponse.json()['siteShieldMaps']:
-            if args.mapName:
-                if eachItem['ruleName'] == args.mapName:
+        for eachItem in list_maps_response.json()['siteShieldMaps']:
+            if args.map_name:
+                if eachItem['ruleName'] == args.map_name:
                     mapFound = True
                     mapId = eachItem['id']
-            elif args.mapId:
-                if str(eachItem['id']) == str(args.mapId):
+            elif args.map_id:
+                if str(eachItem['id']) == str(args.map_id):
                     mapFound = True
                     mapId = eachItem['id']
 
@@ -643,7 +643,7 @@ def ss_ack_change(args):
             exit(-1)
         else:
             root_logger.info('Acknowledge SiteShield map...\n')
-            acknowledge_mapResponse = fireShieldObject.acknowledge_map(
+            acknowledge_mapResponse = fire_shield_object.acknowledge_map(
                 session, mapId)
             if acknowledge_mapResponse.status_code == 200:
                 root_logger.info('Successfully acknowledged!')
@@ -657,7 +657,7 @@ def ss_ack_change(args):
     else:
         root_logger.info(
             'There was error in fetching response. Use --debug to know more.')
-        root_logger.info(json.dumps(list_mapsResponse.json(), indent=4))
+        root_logger.info(json.dumps(list_maps_response.json(), indent=4))
 
 
 def get_prog_name():

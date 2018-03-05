@@ -28,17 +28,17 @@ class fireShield(object):
 
         Returns
         -------
-        listMapsRespose : listMapsRespose
-            (listMapsRespose) Object with all details
+        list_mapsRespose : list_mapsRespose
+            (list_mapsRespose) Object with all details
         """
 
-        listMapsUrl = 'https://' + self.access_hostname + \
+        list_maps_url = 'https://' + self.access_hostname + \
             '/siteshield/v1/maps'
-        listMapsResponse = session.get(
-            listMapsUrl)
-        return listMapsResponse
+        list_maps_response = session.get(
+            list_maps_url)
+        return list_maps_response
 
-    def getMap(self, session, mapId):
+    def get_map(self, session, mapId):
         """
         Function to Get an Enrollment
 
@@ -49,14 +49,14 @@ class fireShield(object):
 
         Returns
         -------
-        getMapRespose : getMapRespose
-            (getMapRespose) Object with all details
+        get_mapRespose : get_mapRespose
+            (get_mapRespose) Object with all details
         """
 
-        getMapUrl = 'https://' + self.access_hostname + \
+        get_map_url = 'https://' + self.access_hostname + \
             '/siteshield/v1/maps/' + str(mapId)
-        getMapResponse = session.get(getMapUrl)
-        return getMapResponse
+        get_map_response = session.get(get_map_url)
+        return get_map_response
 
     def acknowledge_map(self, session, mapId):
         """
@@ -69,15 +69,15 @@ class fireShield(object):
 
         Returns
         -------
-        acknowledgeMapRespose : acknowledgeMapRespose
-            (acknowledgeMapRespose) Object with all details
+        acknowledge_mapRespose : acknowledge_mapRespose
+            (acknowledge_mapRespose) Object with all details
         """
 
-        acknowledgeMapUrl = 'https://' + self.access_hostname + \
+        acknowledge_map_url = 'https://' + self.access_hostname + \
             '/siteshield/v1/maps/' + str(mapId) + '/acknowledge'
-        acknowledgeMapResponse = session.post(
-            acknowledgeMapUrl)
-        return acknowledgeMapResponse
+        acknowledge_map_response = session.post(
+            acknowledge_map_url)
+        return acknowledge_map_response
 
     def list_services(self, session):
         """
@@ -90,17 +90,17 @@ class fireShield(object):
 
         Returns
         -------
-        listServicesRespose : listServicesRespose
-            (listServicesRespose) Object with all details
+        list_servicesRespose : list_servicesRespose
+            (list_servicesRespose) Object with all details
         """
 
-        listServicesUrl = 'https://' + self.access_hostname + \
+        list_services_url = 'https://' + self.access_hostname + \
             '/firewall-rules-manager/v1/services'
-        listServicesResponse = session.get(
-            listServicesUrl)
-        return listServicesResponse
+        list_services_response = session.get(
+            list_services_url)
+        return list_services_response
 
-    def getService(self, session, serviceId):
+    def get_service(self, session, serviceId):
         """
         Function to List Enrollments
 
@@ -111,15 +111,15 @@ class fireShield(object):
 
         Returns
         -------
-        getServiceRespose : getServiceRespose
-            (getServiceRespose) Object with all details
+        get_serviceRespose : get_serviceRespose
+            (get_serviceRespose) Object with all details
         """
 
-        getServiceUrl = 'https://' + self.access_hostname + \
+        get_service_url = 'https://' + self.access_hostname + \
             '/firewall-rules-manager/v1/services/' + str(serviceId)
-        getServiceResponse = session.get(
-            getServiceUrl)
-        return getServiceResponse
+        get_service_response = session.get(
+            get_service_url)
+        return get_service_response
 
     def list_cidr(self, session):
         """
@@ -132,15 +132,15 @@ class fireShield(object):
 
         Returns
         -------
-        listCidrRespose : listCidrRespose
-            (listCidrRespose) Object with all details
+        list_cidr_response : list_cidr_response
+            (list_cidr_response) Object with all details
         """
 
-        listCidrUrl = 'https://' + self.access_hostname + \
+        list_cidr_url = 'https://' + self.access_hostname + \
             '/firewall-rules-manager/v1/cidr-blocks'
-        listCidrResponse = session.get(
-            listCidrUrl)
-        return listCidrResponse
+        list_cidr_response = session.get(
+            list_cidr_url)
+        return list_cidr_response
 
     def list_subscriptions(self, session):
         """
@@ -157,11 +157,11 @@ class fireShield(object):
             (listSubscriptionsRespose) Object with all details
         """
 
-        listSubscriptionsUrl = 'https://' + self.access_hostname + \
+        listSubscriptions_url = 'https://' + self.access_hostname + \
             '/firewall-rules-manager/v1/subscriptions'
-        listSubscriptionsResponse = session.get(
-            listSubscriptionsUrl)
-        return listSubscriptionsResponse
+        listSubscriptions_response = session.get(
+            listSubscriptions_url)
+        return listSubscriptions_response
 
     def update_subscriptions(self, session, subscriptionData):
         """
@@ -174,15 +174,15 @@ class fireShield(object):
 
         Returns
         -------
-        updateSubscriptionsRespose : updateSubscriptionsRespose
-            (updateSubscriptionsRespose) Object with all details
+        update_subscriptionsRespose : update_subscriptionsRespose
+            (update_subscriptionsRespose) Object with all details
         """
 
-        updateSubscriptionsUrl = 'https://' + self.access_hostname + \
+        update_subscriptions_url = 'https://' + self.access_hostname + \
             '/firewall-rules-manager/v1/subscriptions'
-        updateSubscriptionsResponse = session.put(
-            updateSubscriptionsUrl, data=subscriptionData)
-        return updateSubscriptionsResponse
+        update_subscriptions_response = session.put(
+            update_subscriptions_url, data=subscriptionData)
+        return update_subscriptions_response
 
     def acknowledge_map(self, session, mapId):
         """
@@ -195,12 +195,12 @@ class fireShield(object):
 
         Returns
         -------
-        acknowledgeMapRespose : acknowledgeMapRespose
-            (acknowledgeMapRespose) Object with all details
+        acknowledge_mapRespose : acknowledge_mapRespose
+            (acknowledge_mapRespose) Object with all details
         """
 
-        acknowledgeMapUrl = 'https://' + self.access_hostname + \
+        acknowledge_map_url = 'https://' + self.access_hostname + \
             '/siteshield/v1/maps/' + str(mapId) + '/acknowledge'
-        acknowledgeMapResponse = session.post(
-            acknowledgeMapUrl)
-        return acknowledgeMapResponse
+        acknowledge_map_response = session.post(
+            acknowledge_map_url)
+        return acknowledge_map_response
