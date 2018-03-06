@@ -1,5 +1,5 @@
 # cli-firewall
-Provides a way to interact with firewall rules and Site Shield related information via Open APIs. Functionality includes viewing firewall rules services, subscribing and unsubscribing to firewall rules services, viewing and acknowledging Site Shield mps, and listing CIDR blocks.
+Provides a way to interact with firewall rules and Site Shield related information via Open APIs. Functionality includes viewing firewall rules services, subscribing and unsubscribing to firewall rules services, viewing and acknowledging Site Shield maps, and listing CIDR blocks.
 
 ## Local Install
 * Python 3+
@@ -39,103 +39,111 @@ This is the main program that wraps this functionality in a command line utility
 
 
 ### list-services
-List maps
+List available firewall rules services available for subscription. A service must be subscribed to before CIDRs can be displayed for that service.
 
 ```bash
 %  akamai firewall list-services
 ```
 
+
 ### list-subscriptions
-List all the available subscriptions.
+List current subscriptions.
 
 ```bash
 %  akamai firewall list-subscriptions
 ```
 
+
 ### subscribe
-Subscribe to a service.
+Subscribe to a firewall rules service (email address is mandatory).
 
 ```bash
-%  akamai firewall subscribe --service-id 1 --email vbhat@akamai.com
-%  akamai firewall subscribe --service-name FIRSTPOINT --email vbhat@akamai.com
+%  akamai firewall subscribe --service-id 1 --email email@example.com
+%  akamai firewall subscribe --service-name FIRSTPOINT --email email@example.com
 ```
 
-The flags of interest for create are:
+The flags of interest are (please specify either --service-name or --service-id):
 
 ```
---service-id <value>            ID of service to be subscribed for.
---service-name <value>          Name of service to be subscribed for.
-
+--service-id <value>            ID of service to be subscribed for
+--service-name <value>          Name of service to be subscribed for
+--email <value>					Email address to subscribe for service specified
 ```
+
 
 ### unsubscribe
-Unsubscribe to a service.
+Unsubscribe from a specific firewall rules service.
 
 ```bash
 %  akamai firewall unsubscribe --service-id 1
 %  akamai firewall unsubscribe --service-name FIRSTPOINT
 ```
 
-The flags of interest for update are:
+The flags of interest are (please specify either --service-name or --service-id):
 
 ```
---service-id <value>            ID of service to be unsubscribed from.
---service-name <value>          Name of service to be unsubscribed from.
+--service-id <value>            ID of service to be unsubscribed from
+--service-name <value>          Name of service to be unsubscribed from
+--email <value>					Email address to unsubscribe for service specified
 ```
+
 
 ### list-cidrs
-List the CIDR blocks.
+List the CIDR blocks for all current subscriptions or a specific firewall rules service subscription.
 
 ```bash
 %  akamai firewall list-cidrs
+%  akamai firewall list-cidrs --file
+%  akamai firewall list-cidrs --service-name FIRSTPOINT
+%  akamai firewall list-cidrs --service-name 'Global Traffic Management - Siteshield' --file sample.txt
 ```
 
-The flags of interest for download are:
+The flags of interest are:
 
 ```
---cn <common name>  Common name to be used to download the certificate/enrollment information from CPS.
---format <json/yml/yaml>        Data format to be used to save the downloaded certificate information.
-
+--service-id <value>            ID of service to be unsubscribed from (optional)
+--service-name <value>          Name of service to be unsubscribed from (optional)
+--file <filename>				Filename to output CIDRs (optional)
 ```
+
 
 ### ss-list-maps
-List sisteshield maps that you are mapped to.
+List available Site Shield maps.
 
 ```bash
-%  akamai firewall list-ss-maps --cn demo.devops.com
+%  akamai firewall ss-list-maps
 ```
 
-The flags of interest for cancel are:
-
-```
---cn <common name>  Common name to be used to cancel the certificate/enrollment information from CPS.
-
-```
 
 ### ss-list-cidrs
-List sisteshield maps that you are mapped to.
+List the CIDRs for a specified Site Shield map
 
 ```bash
-%  akamai firewall list-ss-maps --cn demo.devops.com
+%  akamai firewall ss-list-cidrs --map-id 12345
+%  akamai firewall ss-list-cidrs --map-name sample.akamaiedge.net
+%  akamai firewall ss-list-cidrs --map-name sample.akamaiedge.net --file sample.txt
 ```
 
-The flags of interest for cancel are:
+The flags of interest are (please specify either --map-id or --map-name):
 
 ```
---cn <common name>  Common name to be used to cancel the certificate/enrollment information from CPS.
-
+--map-id <value>            	ID of desired Site Shield map
+--map-name <value>          	Name of desired Site Shield map
+--file <filename>				Filename to output CIDRs (optional)
 ```
+
 
 ### ss-ack-change
-List sisteshield maps that you are mapped to.
+Acknowledge a pending Site Shield map update.
 
 ```bash
-%  akamai firewall list-ss-maps --cn demo.devops.com
+%  akamai firewall ss-ack-change --map-id 12345
+%  akamai firewall ss-ack-change --map-name sample.akamaiedge.net
 ```
 
-The flags of interest for cancel are:
+The flags of interest are (please specify either --map-id or --map-name):
 
 ```
---cn <common name>  Common name to be used to cancel the certificate/enrollment information from CPS.
-
+--map-id <value>            	ID of desired Site Shield map
+--map-name <value>          	Name of desired Site Shield map
 ```
