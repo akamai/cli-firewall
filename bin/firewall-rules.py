@@ -95,7 +95,7 @@ def cli():
         prog += " [command]"
 
     parser = argparse.ArgumentParser(
-        description='Akamai CLI for Siteshield and Firewall Notifications',
+        description='Akamai CLI for Site Shield and Firewall Rules Notifications',
         add_help=False,
         prog=prog)
     parser.add_argument(
@@ -118,32 +118,32 @@ def cli():
         nargs=argparse.REMAINDER)
 
     actions["list_services"] = create_sub_command(
-        subparsers, "list-services", "List all Maps",
+        subparsers, "list-services", "List all firewall rules services available",
         None,
         None)
 
     actions["list_subscriptions"] = create_sub_command(
-        subparsers, "list-subscriptions", "List all Maps",
+        subparsers, "list-subscriptions", "List current subscriptions",
         None,
         None)
 
     actions["subscribe"] = create_sub_command(
         subparsers, "subscribe",
-        "Subscribe to the firewall notification list ",
+        "Subscribe to a firewall rules service",
         [{"name": "service-name", "help": "Name of the service to be subscribed to within SINGLE quotes"},
          {"name": "service-id", "help": "ID of the service to be subscribed to"}],
         [{"name": "email", "help": "Email Id of the subscriber"}])
 
     actions["unsubscribe"] = create_sub_command(
         subparsers, "unsubscribe",
-        "Unsubscribe to the firewall notification list ",
+        "Unsubscribe from a firewall rules service",
         [{"name": "service-name", "help": "Name of the service to be subscribed to within SINGLE quotes"},
          {"name": "service-id", "help": "ID of the service to be subscribed to"}],
         None)
 
     actions["list_cidrs"] = create_sub_command(
         subparsers, "list-cidrs",
-        "List the CIDR block ",
+        "List the CIDRs for current subscription or a specific firewall rules service",
         [{"name": "service-name", "help": "Name of the service within SINGLE quotes"},
          {"name": "service-id", "help": "Id of the service"},
          {"name": "file", "help": "Name of the file to ouput CIDR blocks"}],
@@ -151,13 +151,13 @@ def cli():
 
     actions["ss_list_maps"] = create_sub_command(
         subparsers, "ss-list-maps",
-        "List the siteshield maps ",
+        "List the available Site Shield maps",
         None,
         None)
 
     actions["ss_list_cidrs"] = create_sub_command(
         subparsers, "ss-list-cidrs",
-        "List the CIDR blocks ",
+        "List the CIDRs for a specific Site Shield map ",
         [{"name": "map-name", "help": "Name of the map within SINGLE quotes"},
          {"name": "map-id", "help": "ID of the map"},
          {"name": "file", "help": "Name of the file to ouput CIDR blocks"}],
@@ -165,7 +165,7 @@ def cli():
 
     actions["ss_ack_change"] = create_sub_command(
         subparsers, "ss-ack-change",
-        "Acknowledge Siteshield map update ",
+        "Acknowledge a pending Site Shield map update ",
         [{"name": "map-name", "help": "Name of the map within SINGLE quotes"},
          {"name": "map-id", "help": "ID of the map"}],
         None)
@@ -504,7 +504,7 @@ def list_cidrs(args):
 def ss_list_maps(args):
     base_url, session = init_config(args.edgerc, args.section)
     fire_shield_object = fireShield(base_url)
-    root_logger.info('Fetching Siteshield Maps...')
+    root_logger.info('Fetching Site Shield Maps...')
 
     list_maps_response = fire_shield_object.list_maps(session)
 
@@ -519,7 +519,7 @@ def ss_list_maps(args):
         table.align = "l"
 
         if len(list_maps_response.json()['siteShieldMaps']) == 0:
-            root_logger.info('No Siteshield maps found...')
+            root_logger.info('No Site Shield maps found...')
             exit(-1)
         for eachItem in list_maps_response.json()['siteShieldMaps']:
             rowData = []
@@ -562,7 +562,7 @@ def ss_list_cidrs(args):
         exit(-1)
     base_url, session = init_config(args.edgerc, args.section)
     fire_shield_object = fireShield(base_url)
-    root_logger.info('Fetching Siteshield CIDR blocks...\n')
+    root_logger.info('Fetching Site Shield CIDR blocks...\n')
 
     if args.file:
         root_logger.info(
@@ -620,7 +620,7 @@ def ss_ack_change(args):
         exit(-1)
     base_url, session = init_config(args.edgerc, args.section)
     fire_shield_object = fireShield(base_url)
-    root_logger.info('Fetching Siteshield maps...\n')
+    root_logger.info('Fetching Site Shield maps...\n')
 
     list_maps_response = fire_shield_object.list_maps(session)
 
@@ -648,7 +648,7 @@ def ss_ack_change(args):
 
             if list_maps_response.status_code == 200:
                 if len(list_maps_response.json()['siteShieldMaps']) == 0:
-                    root_logger.info('No Siteshield maps found...')
+                    root_logger.info('No Site Shield maps found...')
                     exit(-1)
                 for eachItem in list_maps_response.json()['siteShieldMaps']:
                     if eachItem['acknowledged'] is False:
@@ -663,7 +663,7 @@ def ss_ack_change(args):
                 root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
             if update_pending == 1:
-                root_logger.info('Acknowledging SiteShield map...\n')
+                root_logger.info('Acknowledging Site Shield map...\n')
                 acknowledge_mapResponse = fire_shield_object.acknowledge_map(
                     session, mapId)
                 if acknowledge_mapResponse.status_code == 200:
