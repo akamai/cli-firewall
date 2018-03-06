@@ -1,5 +1,5 @@
 # cli-firewall
-Provides a way to interact with your Certificate Provisioning System via Open APIs and without manually having to go into the Luna Portal. Provides various functionality such as viewing current certificates, current status, certificate details, and the ability to update certificates and audit them.
+Provides a way to interact with firewall and siteshield related information via Open APIs and without manually having to go into the Luna Portal. Provides various functionality such as viewing firewall rules services, listing subscriptions, siteshield maps, CIDR blocks and acknowledge siteshield map updates.
 
 ## Local Install
 * Python 3+
@@ -8,10 +8,10 @@ Provides a way to interact with your Certificate Provisioning System via Open AP
 ### Credentials
 In order to use this module, you need to:
 * Set up your credential files as described in the [authorization](https://developer.akamai.com/introduction/Prov_Creds.html) and [credentials](https://developer.akamai.com/introduction/Conf_Client.html) sections of the Get Started pagegetting started guide on developer.akamai.comthe developer portal.  
-* When working through this process you need to give grants for the Certificate Provisionig System API.  The section in your configuration file should be called 'firewall'.
+* When working through this process you need to give grants for the Certificate Provisionig System API.  The section in your configuration file should be called **firewall**.
 
-## Functionality (version 0.0.1)
-The initial version of the cps provides the following functionality:
+## Functionality (version 0.1.0)
+The initial version of the firewall provides the following functionality:
 * List all Maps
 * List all Subscriptions
 * Subscribe to the firewall notification list
@@ -39,45 +39,45 @@ List maps
 ```
 
 ### list-subscriptions
-Get specific details for an enrollment. Available information include the complete JSON data as of now.
+List all the available subscriptions.
 
 ```bash
 %  akamai firewall list-subscriptions
 ```
 
 ### subscribe
-Create a new certificate request.
+Subscribe to a service.
 
 ```bash
-%  akamai firewall subscribe --serviceId 1 --email vbhat@akamai.com
-%  akamai firewall subscribe --serviceName FIRSTPOINT --email vbhat@akamai.com
+%  akamai firewall subscribe --service-id 1 --email vbhat@akamai.com
+%  akamai firewall subscribe --service-name FIRSTPOINT --email vbhat@akamai.com
 ```
 
 The flags of interest for create are:
 
 ```
---serviceId <value>            ID of service to be subscribed for.
---serviceName <value>          Name of service to be subscribed for.
+--service-id <value>            ID of service to be subscribed for.
+--service-name <value>          Name of service to be subscribed for.
 
 ```
 
 ### unsubscribe
-Activate a specified version for a policy to the appropriate network (staging or production)
+Unsubscribe to a service.
 
 ```bash
-%  akamai firewall unsubscribe --serviceId 1
-%  akamai firewall unsubscribe --serviceName FIRSTPOINT
+%  akamai firewall unsubscribe --service-id 1
+%  akamai firewall unsubscribe --service-name FIRSTPOINT
 ```
 
 The flags of interest for update are:
 
 ```
---serviceId <value>            ID of service to be unsubscribed from.
---serviceName <value>          Name of service to be unsubscribed from.
+--service-id <value>            ID of service to be unsubscribed from.
+--service-name <value>          Name of service to be unsubscribed from.
 ```
 
 ### list-cidrs
-Download the enrollment detail into json or yml folder in json or yml format respectively.
+List the CIDR blocks.
 
 ```bash
 %  akamai firewall list-cidrs
@@ -92,7 +92,7 @@ The flags of interest for download are:
 ```
 
 ### list-ss-maps
-Cancel the latest change requested to a Certificate.
+List sisteshield maps that you are mapped to.
 
 ```bash
 %  akamai firewall list-ss-maps --cn demo.devops.com
