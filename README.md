@@ -1,5 +1,5 @@
 # cli-firewall
-Provides a way to interact with firewall and siteshield related information via Open APIs and without manually having to go into the Luna Portal. Provides various functionality such as viewing firewall rules services, listing subscriptions, siteshield maps, CIDR blocks and acknowledge siteshield map updates.
+Provides a way to interact with firewall rules and Site Shield related information via Open APIs. Functionality includes viewing firewall rules services, subscribing and unsubscribing to firewall rules services, viewing and acknowledging Site Shield mps, and listing CIDR blocks.
 
 ## Local Install
 * Python 3+
@@ -8,27 +8,34 @@ Provides a way to interact with firewall and siteshield related information via 
 ### Credentials
 In order to use this module, you need to:
 * Set up your credential files as described in the [authorization](https://developer.akamai.com/introduction/Prov_Creds.html) and [credentials](https://developer.akamai.com/introduction/Conf_Client.html) sections of the Get Started pagegetting started guide on developer.akamai.comthe developer portal.  
-* When working through this process you need to give grants for the Certificate Provisionig System API.  The section in your configuration file should be called **firewall**.
+* When working through this process you need to give grants for the Firewall Rules Manager and Siteshield API.  The section in your configuration file should be called 'firewall'.
+```
+[firewall]
+client_secret = [CLIENT_SECRET]
+host = [HOST]
+access_token = [ACCESS_TOKEN_HERE]
+client_token = [CLIENT_TOKEN_HERE]
+```
 
-## Functionality (version 0.1.0)
-The initial version of the firewall provides the following functionality:
-* List all Maps
-* List all Subscriptions
-* Subscribe to the firewall notification list
-* Unsubscribe to the firewall notification list
-* List the CIDR block 
-* List the siteshield maps
-* Acknowledge Siteshield map update
+## Functionality
+This version includes the following functionality:
+* List all firewall rules services available for subscription
+* Subscribe and unsubscribe to firewall rules services
+* List CIDRs for all current subscriptions or a specific firewall rules subscribed to
+* List all available Site Shield maps
+* List CIDRs for a specified Site Shield map
+* Acknowledge a pending Site Shield map update
 
-## akamai-firewall
-Main program that wraps this functionality in a command line utility:
-* [List all Maps](#list-services)
-* [List all Subscriptions](#list-subscriptions)
-* [Subscribe to the firewall notification list](#subscribe)
-* [Unsubscribe to the firewall notification list](#unsubscribe)
-* [List the CIDR block](#list-cidrs)
-* [List the siteshield maps](#list-ss-maps)
-* [Acknowledge Siteshield map update](#ack-ss-change)
+## akamai-firewall-rules
+This is the main program that wraps this functionality in a command line utility:
+* [list-services](#list-services)
+* [list-subscriptions](#list-subscriptions)
+* [subscribe](#subscribe)
+* [unsubscribe](#unsubscribe)
+* [list-cidrs](#list-cidrs)
+* [ss-list-maps](#ss-list-maps)
+* [ss-list-cidrs](#ss-list-cidrs)
+* [ss-ack-change](#ss-ack-change)
 
 
 ### list-services
@@ -91,7 +98,35 @@ The flags of interest for download are:
 
 ```
 
-### list-ss-maps
+### ss-list-maps
+List sisteshield maps that you are mapped to.
+
+```bash
+%  akamai firewall list-ss-maps --cn demo.devops.com
+```
+
+The flags of interest for cancel are:
+
+```
+--cn <common name>  Common name to be used to cancel the certificate/enrollment information from CPS.
+
+```
+
+### ss-list-cidrs
+List sisteshield maps that you are mapped to.
+
+```bash
+%  akamai firewall list-ss-maps --cn demo.devops.com
+```
+
+The flags of interest for cancel are:
+
+```
+--cn <common name>  Common name to be used to cancel the certificate/enrollment information from CPS.
+
+```
+
+### ss-ack-change
 List sisteshield maps that you are mapped to.
 
 ```bash
