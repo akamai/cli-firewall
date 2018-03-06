@@ -322,7 +322,7 @@ def subscribe(args):
     if list_services_response.status_code == 200:
         for eachItem in list_services_response.json():
             if args.service_id:
-                if int(args.serviceId) == int(eachItem['serviceId']):
+                if int(args.service_id) == int(eachItem['serviceId']):
                     validService = True
                     serviceId = args.serviceId
                     break
