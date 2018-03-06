@@ -95,6 +95,7 @@ List the CIDR blocks for all current subscriptions or a specific firewall rules 
 %  akamai firewall list-cidrs
 %  akamai firewall list-cidrs --file
 %  akamai firewall list-cidrs --service-name FIRSTPOINT
+%  akamai firewall list-cidrs --service-id 20
 %  akamai firewall list-cidrs --service-name 'Global Traffic Management - Siteshield' --file sample.txt
 ```
 
