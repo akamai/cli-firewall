@@ -270,7 +270,7 @@ def list_services(args):
         root_logger.info(table)
     else:
         root_logger.info(
-            'There was error in fetching response. Use --debug to know more.')
+            'There was error in fetching response. Use --debug for more information.')
         root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
 
@@ -300,17 +300,17 @@ def list_subscriptions(args):
         root_logger.info(table)
     else:
         root_logger.info(
-            'There was error in fetching response. Use --debug to know more.')
+            'There was error in fetching response. Use --debug for more information.')
         root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
 
 def subscribe(args):
     if args.service_id and args.service_name:
         root_logger.info(
-            'You cannot specify both service-id and service-name. Enter any one of them.')
+            'You cannot specify both --service-id and --service-name. Please choose one.')
         exit(-1)
     if not args.service_id and not args.service_name:
-        root_logger.info('Specify either of service-id or service-name.')
+        root_logger.info('Specify either of --service-id or --service-name.')
         exit(-1)
 
     base_url, session = init_config(args.edgerc, args.section)
@@ -333,7 +333,7 @@ def subscribe(args):
                     break
     else:
         root_logger.info(
-            'There was error in fetching services response. Use --debug to know more.')
+            'There was error in fetching services response. Use --debug for more information.')
         root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
     if validService is False:
@@ -363,7 +363,7 @@ def subscribe(args):
                         indent=4))
         else:
             root_logger.info(
-                'There was error in fetching subscription response. Use --debug to know more.')
+                'There was error in fetching subscription response. Use --debug for more information.')
             root_logger.debug(
                 json.dumps(
                     list_services_response.json(),
@@ -373,10 +373,10 @@ def subscribe(args):
 def unsubscribe(args):
     if args.service_id and args.service_name:
         root_logger.info(
-            'You cannot specify both service-id and service-name. Enter any one of them.')
+            'You cannot specify both --service-id and --service-name. Please choose one.')
         exit(-1)
     if not args.service_id and not args.service_name:
-        root_logger.info('Specify either of service-id or service-name.')
+        root_logger.info('Specify either of --service-id or --service-name.')
         exit(-1)
 
     base_url, session = init_config(args.edgerc, args.section)
@@ -411,7 +411,7 @@ def unsubscribe(args):
             update_subscriptionsRespose = fire_shield_object.update_subscriptions(
                 session, json.dumps(subscriptionData))
             if update_subscriptionsRespose.status_code == 200:
-                root_logger.info('Subscription updated successfully!\n')
+                root_logger.info('Subscription unsubscribed successfully!\n')
             else:
                 root_logger.info(
                     json.dumps(
@@ -423,7 +423,7 @@ def unsubscribe(args):
             exit(-1)
     else:
         root_logger.info(
-            'There was error in fetching subscription response. Use --debug to know more.')
+            'There was error in fetching subscription response. Use --debug for more information.')
         root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
 
@@ -497,7 +497,7 @@ def list_cidrs(args):
             pass
     else:
         root_logger.info(
-            'There was error in fetching response. Use --debug to know more.')
+            'There was error in fetching response. Use --debug for more information.')
         root_logger.debug(json.dumps(list_cidrResponse.json(), indent=4))
 
 
@@ -548,17 +548,17 @@ def ss_list_maps(args):
         root_logger.info(table)
     else:
         root_logger.info(
-            'There was error in fetching response. Use --debug to know more.')
+            'There was error in fetching response. Use --debug for more information.')
         root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
 
 def ss_list_cidrs(args):
     if args.map_id and args.map_name:
         root_logger.info(
-            'You cannot specify both map-id and map-name. Enter any one of them.')
+            'You cannot specify both --map-id and --map-name. Please choose one.')
         exit(-1)
     if not args.map_id and not args.map_name:
-        root_logger.info('Specify either of map-id or map-name.')
+        root_logger.info('Specify either of --map-id or --map-name.')
         exit(-1)
     base_url, session = init_config(args.edgerc, args.section)
     fire_shield_object = fireShield(base_url)
@@ -601,22 +601,22 @@ def ss_list_cidrs(args):
 
         if mapFound is False:
             root_logger.info(
-                'Unable to find the map. Please check the mapName or mapId')
+                'Unable to find the map. Please check the --map-name or --map-id')
             exit(-1)
 
     else:
         root_logger.info(
-            'There was error in fetching response. Use --debug to know more.')
+            'There was error in fetching response. Use --debug for more information.')
         root_logger.debug(json.dumps(list_maps_response.json(), indent=4))
 
 
 def ss_ack_change(args):
     if args.map_id and args.map_name:
         root_logger.info(
-            'You cannot specify both map-id and map-name. Enter any one of them.')
+            'You cannot specify both --map-id and --map-name. Please choose one.')
         exit(-1)
     if not args.map_id and not args.map_name:
-        root_logger.info('Specify either of map-id or map-name.')
+        root_logger.info('Specify either of --map-id or --map-name.')
         exit(-1)
     base_url, session = init_config(args.edgerc, args.section)
     fire_shield_object = fireShield(base_url)
@@ -639,7 +639,7 @@ def ss_ack_change(args):
 
         if mapFound is False:
             root_logger.info(
-                'Unable to find the map. Please check the name/Id')
+                'Unable to find the map. Please check the --map-name or --map-id')
             exit(-1)
         else:
             #Check whether there is some update to ack
@@ -659,7 +659,7 @@ def ss_ack_change(args):
                         update_pending = 0
             else:
                 root_logger.info(
-                    'There was error in fetching list_maps_response. Use --debug to know more.')
+                    'There was error in fetching list_maps_response. Use --debug for more information.')
                 root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
             if update_pending == 1:
@@ -677,10 +677,10 @@ def ss_ack_change(args):
                     exit(-1)
             else:
                 #There was nothing to Acknowledge
-                root_logger.info('There is no update to be Acknowledged.')
+                root_logger.info('There is no update to be acknowledged.')
     else:
         root_logger.info(
-            'There was error in fetching response. Use --debug to know more.')
+            'There was error in fetching response. Use --debug for more information.')
         root_logger.info(json.dumps(list_maps_response.json(), indent=4))
 
 
