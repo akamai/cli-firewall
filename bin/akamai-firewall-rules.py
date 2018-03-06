@@ -139,7 +139,7 @@ def cli():
         "Unsubscribe from a firewall rules service",
         [{"name": "service-name", "help": "Name of the service to be subscribed to within SINGLE quotes"},
          {"name": "service-id", "help": "ID of the service to be subscribed to"}],
-        None)
+        [{"name": "email", "help": "Email Id of the subscriber"}])
 
     actions["list_cidrs"] = create_sub_command(
         subparsers, "list-cidrs",
@@ -387,22 +387,23 @@ def unsubscribe(args):
     validService = False
     if list_subscriptions_response.status_code == 200:
         subscriptionData = list_subscriptions_response.json()
-
         # Using Index to iterate and delete the item from list
         index = 0
         for everySubscription in subscriptionData['subscriptions']:
             if args.service_id:
                 if int(args.service_id) == int(everySubscription['serviceId']):
-                    validService = True
-                    serviceName = everySubscription['serviceName']
-                    del subscriptionData['subscriptions'][index]
-                    break
+                    if args.email == everySubscription['email']:
+                        validService = True
+                        serviceName = everySubscription['serviceName']
+                        del subscriptionData['subscriptions'][index]
+                        break
             if args.service_name:
                 if args.service_name == everySubscription['serviceName']:
-                    validService = True
-                    serviceName = everySubscription['serviceName']
-                    del subscriptionData['subscriptions'][index]
-                    break
+                    if args.email == everySubscription['email']:
+                        validService = True
+                        serviceName = everySubscription['serviceName']
+                        del subscriptionData['subscriptions'][index]
+                        break
             index += 1
 
         #root_logger.info(json.dumps(subscriptionData, indent=4))
@@ -419,7 +420,7 @@ def unsubscribe(args):
                         indent=4))
         else:
             root_logger.info(
-                'Service name does not exist in current subscription...\n')
+                'Service name/id AND/OR email does not exist in current subscription...\n')
             exit(-1)
     else:
         root_logger.info(
