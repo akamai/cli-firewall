@@ -67,7 +67,7 @@ The flags of interest are (please specify either --service-name or --service-id)
 ```
 --service-id <value>            ID of service to be subscribed for
 --service-name <value>          Name of service to be subscribed for
---email <value>					Email address to subscribe for service specified
+--email <value>                 Email address to subscribe for service specified
 ```
 
 
@@ -84,7 +84,7 @@ The flags of interest are (please specify either --service-name or --service-id)
 ```
 --service-id <value>            ID of service to be unsubscribed from
 --service-name <value>          Name of service to be unsubscribed from
---email <value>					Email address to unsubscribe for service specified
+--email <value>                 Email address to unsubscribe for service specified
 ```
 
 
@@ -104,7 +104,7 @@ The flags of interest are:
 ```
 --service-id <value>            ID of service to be unsubscribed from (optional)
 --service-name <value>          Name of service to be unsubscribed from (optional)
---file <filename>				Filename to output CIDRs (optional)
+--file <filename>               Filename to output CIDRs (optional)
 ```
 
 
@@ -130,7 +130,7 @@ The flags of interest are (please specify either --map-id or --map-name):
 ```
 --map-id <value>            	ID of desired Site Shield map
 --map-name <value>          	Name of desired Site Shield map
---file <filename>				Filename to output CIDRs (optional)
+--file <filename>               Filename to output CIDRs (optional)
 ```
 
 
