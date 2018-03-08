@@ -420,7 +420,7 @@ def unsubscribe(args):
                         indent=4))
         else:
             root_logger.info(
-                'Service name/id AND/OR email does not exist in current subscription...\n')
+                'Current subscription not found...\n')
             exit(-1)
     else:
         root_logger.info(
