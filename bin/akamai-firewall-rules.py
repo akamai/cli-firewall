@@ -324,7 +324,7 @@ def subscribe(args):
             if args.service_id:
                 if int(args.service_id) == int(eachItem['serviceId']):
                     validService = True
-                    serviceId = args.serviceId
+                    serviceId = args.service_id
                     break
             if args.service_name:
                 if args.service_name == eachItem['serviceName']:
