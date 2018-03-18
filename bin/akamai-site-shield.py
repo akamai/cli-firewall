@@ -1,0 +1,405 @@
+"""
+Copyright 2017 Akamai Technologies, Inc. All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
+"""
+This code leverages akamai OPEN API. to control Certificates deployed in Akamai Network.
+In case you need quick explanation contact the initiators.
+Initiators: vbhat@akamai.com, aetsai@akamai.com, mkilmer@akamai.com
+"""
+
+import json
+from firewallruleswrapper import fireShield
+import argparse
+import requests
+import os
+import logging
+import sys
+from prettytable import PrettyTable
+from akamai.edgegrid import EdgeGridAuth, EdgeRc
+import datetime
+
+
+PACKAGE_VERSION = "0.1.0"
+
+# Setup logging
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+log_file = os.path.join('logs', 'akamai-firewall-rules.log')
+
+# Set the format of logging in console and file separately
+log_formatter = logging.Formatter(
+    "%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+console_formatter = logging.Formatter("%(message)s")
+root_logger = logging.getLogger()
+
+logfile_handler = logging.FileHandler(log_file, mode='w')
+logfile_handler.setFormatter(log_formatter)
+root_logger.addHandler(logfile_handler)
+
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(console_formatter)
+root_logger.addHandler(console_handler)
+# Set Log Level to DEBUG, INFO, WARNING, ERROR, CRITICAL
+root_logger.setLevel(logging.INFO)
+
+
+def init_config(edgerc_file, section):
+    if not edgerc_file:
+        if not os.getenv("AKAMAI_EDGERC"):
+            edgerc_file = os.path.join(os.path.expanduser("~"), '.edgerc')
+        else:
+            edgerc_file = os.getenv("AKAMAI_EDGERC")
+
+    if not os.access(edgerc_file, os.R_OK):
+        root_logger.error("Unable to read edgerc file \"%s\"" % edgerc_file)
+        exit(1)
+
+    if not section:
+        if not os.getenv("AKAMAI_EDGERC_SECTION"):
+            section = "firewall"
+        else:
+            section = os.getenv("AKAMAI_EDGERC_SECTION")
+
+    try:
+        edgerc = EdgeRc(edgerc_file)
+        base_url = edgerc.get(section, 'host')
+
+        session = requests.Session()
+        session.auth = EdgeGridAuth.from_edgerc(edgerc, section)
+
+        return base_url, session
+    except configparser.NoSectionError:
+        root_logger.error("Edgerc section \"%s\" not found" % section)
+        exit(1)
+    except Exception:
+        root_logger.info(
+            "Unknown error occurred trying to read edgerc file (%s)" %
+            edgerc_file)
+        exit(1)
+
+
+def cli():
+    prog = get_prog_name()
+    if len(sys.argv) == 1:
+        prog += " [command]"
+
+    parser = argparse.ArgumentParser(
+        description='Akamai CLI for Site Shield and Firewall Rules Notifications',
+        add_help=False,
+        prog=prog)
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='%(prog)s ' +
+                PACKAGE_VERSION)
+
+    subparsers = parser.add_subparsers(
+        title='Commands', dest="command", metavar="")
+
+    actions = {}
+
+    subparsers.add_parser(
+        name="help",
+        help="Show available help",
+        add_help=False).add_argument(
+        'args',
+        metavar="",
+        nargs=argparse.REMAINDER)
+
+    actions["list_maps"] = create_sub_command(
+        subparsers, "list-maps",
+        "List the available Site Shield maps",
+        None,
+        None)
+
+    actions["list_cidrs"] = create_sub_command(
+        subparsers, "list-cidrs",
+        "List the CIDRs for a specific Site Shield map ",
+        [{"name": "map-name", "help": "Name of the map within SINGLE quotes"},
+         {"name": "map-id", "help": "ID of the map"}],
+        None)
+
+    actions["ack_change"] = create_sub_command(
+        subparsers, "ack-change",
+        "Acknowledge a pending Site Shield map update ",
+        [{"name": "map-name", "help": "Name of the map within SINGLE quotes"},
+         {"name": "map-id", "help": "ID of the map"}],
+        None)
+
+    args = parser.parse_args()
+
+    if len(sys.argv) <= 1:
+        parser.print_help()
+        return 0
+
+    if args.command == "help":
+        if len(args.args) > 0:
+            if actions[args.args[0]]:
+                actions[args.args[0]].print_help()
+        else:
+            parser.prog = get_prog_name() + " help [command]"
+            parser.print_help()
+        return 0
+
+    # Override log level if user wants to run in debug mode
+    # Set Log Level to DEBUG, INFO, WARNING, ERROR, CRITICAL
+    if args.debug:
+        root_logger.setLevel(logging.DEBUG)
+
+    return getattr(sys.modules[__name__], args.command.replace("-", "_"))(args)
+
+
+def create_sub_command(
+        subparsers,
+        name,
+        help,
+        optional_arguments=None,
+        required_arguments=None):
+    action = subparsers.add_parser(name=name, help=help, add_help=False)
+
+    if required_arguments:
+        required = action.add_argument_group("required arguments")
+        for arg in required_arguments:
+            name = arg["name"]
+            del arg["name"]
+            required.add_argument("--" + name,
+                                  required=True,
+                                  **arg,
+                                  )
+
+    optional = action.add_argument_group("optional arguments")
+    if optional_arguments:
+        for arg in optional_arguments:
+            name = arg["name"]
+            del arg["name"]
+            if name == 'force':
+                optional.add_argument(
+                    "--" + name,
+                    required=False,
+                    **arg,
+                    action="store_true")
+            else:
+                optional.add_argument("--" + name,
+                                      required=False,
+                                      **arg,
+                                      )
+
+    optional.add_argument(
+        "--edgerc",
+        help="Location of the credentials file [$AKAMAI_EDGERC]",
+        default=os.path.join(
+            os.path.expanduser("~"),
+            '.edgerc'))
+
+    optional.add_argument(
+        "--section",
+        help="Section of the credentials file [$AKAMAI_EDGERC_SECTION]",
+        default="firewall")
+
+    optional.add_argument(
+        "--debug",
+        help="DEBUG mode to generate additional logs for troubleshooting",
+        action="store_true")
+
+    return action
+
+
+def list_maps(args):
+    base_url, session = init_config(args.edgerc, args.section)
+    fire_shield_object = fireShield(base_url)
+    root_logger.info('Fetching Site Shield Maps...')
+
+    list_maps_response = fire_shield_object.list_maps(session)
+
+    if list_maps_response.status_code == 200:
+        #root_logger.info(json.dumps(list_maps_response.json(), indent=4))
+        table = PrettyTable(['Map ID',
+                             'Map Name',
+                             'Status',
+                             'Last Acknowledged By',
+                             'Acknowledge Date',
+                             'Contact Info'])
+        table.align = "l"
+
+        if len(list_maps_response.json()['siteShieldMaps']) == 0:
+            root_logger.info('No Site Shield maps found...')
+            exit(-1)
+        for eachItem in list_maps_response.json()['siteShieldMaps']:
+            rowData = []
+            if eachItem['acknowledged'] is False:
+                status = 'UPDATES PENDING'
+            else:
+                status = 'Up-To-Date'
+
+            mapId = eachItem['id']
+            ruleName = eachItem['ruleName']
+            acknowledgedBy = eachItem['acknowledgedBy']
+            acknowledgedOn = eachItem['acknowledgedOn']
+            acknowledgedOn = '{0:%Y-%m-%d %H:%M:%S}'.format(
+                datetime.datetime.fromtimestamp(acknowledgedOn / 1000))
+            contacts = ''
+            for eachContact in eachItem['contacts']:
+                contacts = eachContact + ' ' + contacts
+            rowData.append(mapId)
+            rowData.append(ruleName)
+            rowData.append(status)
+            rowData.append(acknowledgedBy)
+            rowData.append(acknowledgedOn)
+            rowData.append(contacts)
+
+            table.add_row(rowData)
+        root_logger.info(table)
+    else:
+        root_logger.info(
+            'There was error in fetching response. Use --debug for more information.')
+        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+
+
+def list_cidrs(args):
+    if args.map_id and args.map_name:
+        root_logger.info(
+            'You cannot specify both --map-id and --map-name. Please choose one.')
+        exit(-1)
+    if not args.map_id and not args.map_name:
+        root_logger.info('Specify either of --map-id or --map-name.')
+        exit(-1)
+    base_url, session = init_config(args.edgerc, args.section)
+    fire_shield_object = fireShield(base_url)
+    root_logger.info('Fetching Site Shield CIDR blocks...\n')
+
+    list_maps_response = fire_shield_object.list_maps(session)
+
+    if list_maps_response.status_code == 200:
+        #root_logger.info(json.dumps(list_maps_response.json(), indent=4))
+        mapFound = False
+        for eachItem in list_maps_response.json()['siteShieldMaps']:
+            if args.map_name:
+                if eachItem['ruleName'] == args.map_name:
+                    #root_logger.info('Current CIDR blocks are: ')
+                    for eachAddress in eachItem['currentCidrs']:
+                        print(eachAddress)
+                    mapFound = True
+            elif args.map_id:
+                if str(eachItem['id']) == str(args.map_id):
+                    #root_logger.info('Current CIDR blocks are: ')
+                    for eachAddress in eachItem['currentCidrs']:
+                        print(eachAddress)
+                    mapFound = True
+
+        if mapFound is False:
+            root_logger.info(
+                'Unable to find the map. Please check the --map-name or --map-id')
+            exit(-1)
+
+    else:
+        root_logger.info(
+            'There was error in fetching response. Use --debug for more information.')
+        root_logger.debug(json.dumps(list_maps_response.json(), indent=4))
+
+
+def ack_change(args):
+    if args.map_id and args.map_name:
+        root_logger.info(
+            'You cannot specify both --map-id and --map-name. Please choose one.')
+        exit(-1)
+    if not args.map_id and not args.map_name:
+        root_logger.info('Specify either of --map-id or --map-name.')
+        exit(-1)
+    base_url, session = init_config(args.edgerc, args.section)
+    fire_shield_object = fireShield(base_url)
+    root_logger.info('Fetching Site Shield maps...\n')
+
+    list_maps_response = fire_shield_object.list_maps(session)
+
+    if list_maps_response.status_code == 200:
+        #root_logger.info(json.dumps(list_maps_response.json(), indent=4))
+        mapFound = False
+        for eachItem in list_maps_response.json()['siteShieldMaps']:
+            if args.map_name:
+                if eachItem['ruleName'] == args.map_name:
+                    mapFound = True
+                    mapId = eachItem['id']
+            elif args.map_id:
+                if str(eachItem['id']) == str(args.map_id):
+                    mapFound = True
+                    mapId = eachItem['id']
+
+        if mapFound is False:
+            root_logger.info(
+                'Unable to find the map. Please check the --map-name or --map-id')
+            exit(-1)
+        else:
+            #Check whether there is some update to ack
+            update_pending = 0
+            list_maps_response = fire_shield_object.list_maps(session)
+
+            if list_maps_response.status_code == 200:
+                if len(list_maps_response.json()['siteShieldMaps']) == 0:
+                    root_logger.info('No Site Shield maps found...')
+                    exit(-1)
+                for eachItem in list_maps_response.json()['siteShieldMaps']:
+                    if eachItem['acknowledged'] is False:
+                        status = 'UPDATES PENDING'
+                        update_pending = 1
+                    else:
+                        status = 'Up-To-Date'
+                        update_pending = 0
+            else:
+                root_logger.info(
+                    'There was error in fetching list_maps_response. Use --debug for more information.')
+                root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+
+            if update_pending == 1:
+                root_logger.info('Acknowledging Site Shield map...\n')
+                acknowledge_mapResponse = fire_shield_object.acknowledge_map(
+                    session, mapId)
+                if acknowledge_mapResponse.status_code == 200:
+                    root_logger.info('Successfully acknowledged!')
+                else:
+                    root_logger.info('Unknown error: Acknowledgement unsuccessful')
+                    root_logger.info(
+                        json.dumps(
+                            acknowledge_mapResponse.json(),
+                            indent=4))
+                    exit(-1)
+            else:
+                #There was nothing to Acknowledge
+                root_logger.info('There is no update to be acknowledged.')
+    else:
+        root_logger.info(
+            'There was error in fetching response. Use --debug for more information.')
+        root_logger.info(json.dumps(list_maps_response.json(), indent=4))
+
+
+def get_prog_name():
+    prog = os.path.basename(sys.argv[0])
+    if os.getenv("AKAMAI_CLI"):
+        prog = "akamai firewall"
+    return prog
+
+
+def get_cache_dir():
+    if os.getenv("AKAMAI_CLI_CACHE_DIR"):
+        return os.getenv("AKAMAI_CLI_CACHE_DIR")
+
+    return os.curdir
+
+
+# Final or common Successful exit
+if __name__ == '__main__':
+    try:
+        status = cli()
+        exit(status)
+    except KeyboardInterrupt:
+        exit(1)
