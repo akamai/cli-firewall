@@ -8,6 +8,12 @@
       "aliases": ["firewall"],
       "version": "0.1.0",
       "description": "Access details of maps, subscriptions, firewall notification lists and SS Maps"
+    },
+    {
+      "name": "site-shield",
+      "aliases": ["ss"],
+      "version": "0.1.0",
+      "description": "Access details of SS Maps and Acknowledge SS changes"
     }
   ]
 }

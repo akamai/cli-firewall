@@ -23,6 +23,7 @@ from firewallruleswrapper import fireShield
 import argparse
 import requests
 import os
+import configparser
 import logging
 import sys
 from prettytable import PrettyTable
@@ -307,7 +308,7 @@ def subscribe(args):
                     serviceId = args.service_id
                     break
             if args.service_name:
-                if args.service_name == eachItem['serviceName']:
+                if args.service_name.upper() == eachItem['serviceName'].upper():
                     validService = True
                     serviceId = eachItem['serviceId']
                     break
@@ -378,7 +379,7 @@ def unsubscribe(args):
                         del subscriptionData['subscriptions'][index]
                         break
             if args.service_name:
-                if args.service_name == everySubscription['serviceName']:
+                if args.service_name.upper() == everySubscription['serviceName'].upper():
                     if args.email == everySubscription['email']:
                         validService = True
                         serviceName = everySubscription['serviceName']
@@ -408,6 +409,39 @@ def unsubscribe(args):
         root_logger.debug(json.dumps(list_services_response.json(), indent=4))
 
 
+def process_json_output(json_response):
+    serviceid_set = set()
+    collated_list = []
+
+    #Play with two datastructures to collate all IP addresses
+    for every_block in json_response:
+        if every_block['serviceId'] in serviceid_set:
+            for every_block_of_collated_list in collated_list:
+                if every_block_of_collated_list['serviceId'] == every_block['serviceId']:
+                    if 'IPs' in every_block_of_collated_list:
+                        every_block_of_collated_list['IPs'].append(every_block['cidr'] + every_block['cidrMask'])
+                    else:
+                        every_block_of_collated_list['IPs']= [every_block['cidr'] + every_block['cidrMask']]
+        else:
+            collated_list.append(every_block)
+            serviceid_set.add(every_block['serviceId'])
+
+    #Remove the un-necessary items
+    for every_final_block in collated_list:
+        del every_final_block['cidr']
+        del every_final_block['cidrMask']
+        del every_final_block['creationDate']
+        del every_final_block['effectiveDate']
+        del every_final_block['changeDate']
+        del every_final_block['lastAction']
+        del every_final_block['minIp']
+        del every_final_block['maxIp']
+        del every_final_block['port']
+
+    #Finally print the items
+    print(json.dumps(collated_list, indent=4))
+
+
 def list_cidrs(args):
     base_url, session = init_config(args.edgerc, args.section)
     fire_shield_object = fireShield(base_url)
@@ -424,10 +458,11 @@ def list_cidrs(args):
             root_logger.info('No subscriptions exist...')
             exit(-1)
 
+        specific_service_json = []
         for eachItem in list_cidrResponse.json():
             rowData = []
             if args.service_name:
-                if args.service_name == eachItem['serviceName']:
+                if args.service_name.upper() == eachItem['serviceName'].upper():
                     if not args.json:
                         rowData.append(eachItem['serviceName'])
                         rowData.append(
@@ -436,16 +471,8 @@ def list_cidrs(args):
                         rowData.append(eachItem['effectiveDate'])
                         table.add_row(rowData)
                     else:
-                        del eachItem['cidrId']
-                        del eachItem['creationDate']
-                        del eachItem['effectiveDate']
-                        del eachItem['changeDate']
-                        del eachItem['minIp']
-                        del eachItem['maxIp']
-                        del eachItem['lastAction']
-                        eachItem['cidr'] = eachItem['cidr'] + eachItem['cidrMask']
-                        del eachItem['cidrMask']
-                        print(json.dumps(eachItem, indent=4))
+                        specific_service_json.append(eachItem)
+
             elif args.service_id:
                 if str(args.service_id) == str(eachItem['serviceId']):
                     if not args.json:
@@ -456,16 +483,7 @@ def list_cidrs(args):
                         rowData.append(eachItem['effectiveDate'])
                         table.add_row(rowData)
                     else:
-                        del eachItem['cidrId']
-                        del eachItem['creationDate']
-                        del eachItem['effectiveDate']
-                        del eachItem['changeDate']
-                        del eachItem['minIp']
-                        del eachItem['maxIp']
-                        del eachItem['lastAction']
-                        eachItem['cidr'] = eachItem['cidr'] + eachItem['cidrMask']
-                        del eachItem['cidrMask']
-                        print(json.dumps(eachItem, indent=4))
+                        specific_service_json.append(eachItem)
 
             else:
                 if not args.json:
@@ -476,18 +494,13 @@ def list_cidrs(args):
                     rowData.append(eachItem['effectiveDate'])
                     table.add_row(rowData)
                 else:
-                    del eachItem['cidrId']
-                    del eachItem['creationDate']
-                    del eachItem['effectiveDate']
-                    del eachItem['changeDate']
-                    del eachItem['minIp']
-                    del eachItem['maxIp']
-                    del eachItem['lastAction']
-                    eachItem['cidr'] = eachItem['cidr'] + eachItem['cidrMask']
-                    del eachItem['cidrMask']
-                    print(json.dumps(eachItem, indent=4))
+                    specific_service_json.append(eachItem)
 
-        print(table)
+
+        if not args.json:
+            print(table)
+        else:
+            process_json_output(specific_service_json)
 
     else:
         root_logger.info(

@@ -24,6 +24,7 @@ import argparse
 import requests
 import os
 import logging
+import configparser
 import sys
 from prettytable import PrettyTable
 from akamai.edgegrid import EdgeGridAuth, EdgeRc
@@ -67,7 +68,7 @@ def init_config(edgerc_file, section):
 
     if not section:
         if not os.getenv("AKAMAI_EDGERC_SECTION"):
-            section = "firewall"
+            section = "site-shield"
         else:
             section = os.getenv("AKAMAI_EDGERC_SECTION")
 
@@ -127,7 +128,8 @@ def cli():
         subparsers, "list-cidrs",
         "List the CIDRs for a specific Site Shield map ",
         [{"name": "map-name", "help": "Name of the map within SINGLE quotes"},
-         {"name": "map-id", "help": "ID of the map"}],
+         {"name": "map-id", "help": "ID of the map"},
+         {"name": "json", "help": "output format in json"}],
         None)
 
     actions["ack_change"] = create_sub_command(
@@ -183,7 +185,7 @@ def create_sub_command(
         for arg in optional_arguments:
             name = arg["name"]
             del arg["name"]
-            if name == 'force':
+            if name == 'force' or name == 'json':
                 optional.add_argument(
                     "--" + name,
                     required=False,
@@ -205,7 +207,7 @@ def create_sub_command(
     optional.add_argument(
         "--section",
         help="Section of the credentials file [$AKAMAI_EDGERC_SECTION]",
-        default="firewall")
+        default="site-shield")
 
     optional.add_argument(
         "--debug",
@@ -285,17 +287,21 @@ def list_cidrs(args):
         mapFound = False
         for eachItem in list_maps_response.json()['siteShieldMaps']:
             if args.map_name:
-                if eachItem['ruleName'] == args.map_name:
-                    #root_logger.info('Current CIDR blocks are: ')
-                    for eachAddress in eachItem['currentCidrs']:
-                        print(eachAddress)
+                if eachItem['ruleName'].upper() == args.map_name.upper():
                     mapFound = True
+                    if not args.json:
+                        for eachAddress in eachItem['currentCidrs']:
+                            print(eachAddress)
+                    else:
+                        print(json.dumps(eachItem, indent=4))
             elif args.map_id:
                 if str(eachItem['id']) == str(args.map_id):
-                    #root_logger.info('Current CIDR blocks are: ')
-                    for eachAddress in eachItem['currentCidrs']:
-                        print(eachAddress)
                     mapFound = True
+                    if not args.json:
+                        for eachAddress in eachItem['currentCidrs']:
+                            print(eachAddress)
+                    else:
+                        print(json.dumps(eachItem, indent=4))
 
         if mapFound is False:
             root_logger.info(
@@ -327,7 +333,7 @@ def ack_change(args):
         mapFound = False
         for eachItem in list_maps_response.json()['siteShieldMaps']:
             if args.map_name:
-                if eachItem['ruleName'] == args.map_name:
+                if eachItem['ruleName'].upper() == args.map_name.upper():
                     mapFound = True
                     mapId = eachItem['id']
             elif args.map_id:
