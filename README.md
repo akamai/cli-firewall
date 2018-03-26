@@ -1,5 +1,5 @@
 # cli-firewall-rules
-Provides a way to interact with firewall rules and Site Shield related information via Open APIs. Functionality includes viewing firewall rules services, subscribing and unsubscribing to firewall rules services, viewing and acknowledging Site Shield maps, and listing CIDR blocks.
+Provides a way to interact with Firewall Rules and Site Shield related information via Open APIs. Functionality includes viewing firewall rules services, subscribing and unsubscribing to firewall rules services, viewing and acknowledging Site Shield maps, and listing CIDR blocks for each service.
 
 ## Local Install
 * Python 3+
@@ -8,9 +8,16 @@ Provides a way to interact with firewall rules and Site Shield related informati
 ### Credentials
 In order to use this module, you need to:
 * Set up your credential files as described in the [authorization](https://developer.akamai.com/introduction/Prov_Creds.html) and [credentials](https://developer.akamai.com/introduction/Conf_Client.html) sections of the Get Started pagegetting started guide on developer.akamai.comthe developer portal.  
-* When working through this process you need to give grants for the Firewall Rules Manager and Siteshield API.  The section in your configuration file should be called 'firewall'.
+* When working through this process you need to give grants for the Firewall Rules Manager and Siteshield API.  For Firewall Rules, the section in your configuration file should be called [firewall]. For Site Shield, the section in your configuration file should be called [site-shield]
 ```
 [firewall]
+client_secret = [CLIENT_SECRET]
+host = [HOST]
+access_token = [ACCESS_TOKEN_HERE]
+client_token = [CLIENT_TOKEN_HERE]
+```
+```
+[site-shield]
 client_secret = [CLIENT_SECRET]
 host = [HOST]
 access_token = [ACCESS_TOKEN_HERE]
@@ -33,9 +40,12 @@ This is the main program that wraps this functionality in a command line utility
 * [subscribe](#subscribe)
 * [unsubscribe](#unsubscribe)
 * [list-cidrs](#list-cidrs)
-* [ss-list-maps](#ss-list-maps)
-* [ss-list-cidrs](#ss-list-cidrs)
-* [ss-ack-change](#ss-ack-change)
+
+## akamai-site-shield
+This is the main program that wraps this functionality in a command line utility:
+* [list-maps](#list-maps)
+* [list-cidrs](#list-cidrs)
+* [acknowledge](#acknowledge)
 
 
 ### list-services
@@ -96,7 +106,7 @@ List the CIDR blocks for all current subscriptions or a specific firewall rules 
 %  akamai firewall list-cidrs --file
 %  akamai firewall list-cidrs --service-name FIRSTPOINT
 %  akamai firewall list-cidrs --service-id 20
-%  akamai firewall list-cidrs --service-name 'Global Traffic Management - Siteshield' --file sample.txt
+%  akamai firewall list-cidrs --service-name 'Global Traffic Management - Siteshield' --json
 ```
 
 The flags of interest are:
@@ -104,25 +114,25 @@ The flags of interest are:
 ```
 --service-id <value>            ID of service to be unsubscribed from (optional)
 --service-name <value>          Name of service to be unsubscribed from (optional)
---file <filename>               Filename to output CIDRs (optional)
+--json                          Display output in json format (optional)
 ```
 
 
-### ss-list-maps
+### list-maps
 List available Site Shield maps.
 
 ```bash
-%  akamai firewall ss-list-maps
+%  akamai site-shield list-maps
 ```
 
 
-### ss-list-cidrs
+### list-cidrs
 List the CIDRs for a specified Site Shield map
 
 ```bash
-%  akamai firewall ss-list-cidrs --map-id 12345
-%  akamai firewall ss-list-cidrs --map-name sample.akamaiedge.net
-%  akamai firewall ss-list-cidrs --map-name sample.akamaiedge.net --file sample.txt
+%  akamai site-shield list-cidrs --map-id 12345
+%  akamai site-shield list-cidrs --map-name sample.akamaiedge.net
+%  akamai site-shield list-cidrs --map-name sample.akamaiedge.net --json
 ```
 
 The flags of interest are (please specify either --map-id or --map-name):
@@ -130,16 +140,16 @@ The flags of interest are (please specify either --map-id or --map-name):
 ```
 --map-id <value>            	ID of desired Site Shield map
 --map-name <value>          	Name of desired Site Shield map
---file <filename>               Filename to output CIDRs (optional)
+--json                        Display output in json format (optional)
 ```
 
 
-### ss-ack-change
+### acknowledge
 Acknowledge a pending Site Shield map update.
 
 ```bash
-%  akamai firewall ss-ack-change --map-id 12345
-%  akamai firewall ss-ack-change --map-name sample.akamaiedge.net
+%  akamai site-shield acknowledge --map-id 12345
+%  akamai site-shield acknowledge --map-name sample.akamaiedge.net
 ```
 
 The flags of interest are (please specify either --map-id or --map-name):
