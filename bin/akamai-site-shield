@@ -132,8 +132,8 @@ def cli():
          {"name": "json", "help": "output format in json"}],
         None)
 
-    actions["ack_change"] = create_sub_command(
-        subparsers, "ack-change",
+    actions["acknowledge"] = create_sub_command(
+        subparsers, "acknowledge",
         "Acknowledge a pending Site Shield map update ",
         [{"name": "map-name", "help": "Name of the map within SINGLE quotes"},
          {"name": "map-id", "help": "ID of the map"}],
@@ -326,7 +326,7 @@ def list_cidrs(args):
         root_logger.debug(json.dumps(list_maps_response.json(), indent=4))
 
 
-def ack_change(args):
+def acknowledge(args):
     if args.map_id and args.map_name:
         root_logger.info(
             'You cannot specify both --map-id and --map-name. Please choose one.')
