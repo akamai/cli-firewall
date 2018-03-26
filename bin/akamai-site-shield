@@ -285,13 +285,21 @@ def list_cidrs(args):
     if list_maps_response.status_code == 200:
         #root_logger.info(json.dumps(list_maps_response.json(), indent=4))
         mapFound = False
+        table = PrettyTable(
+            ['Map Name', 'CIDR Block'])
+        table.align = "l"
+
         for eachItem in list_maps_response.json()['siteShieldMaps']:
             if args.map_name:
                 if eachItem['ruleName'].upper() == args.map_name.upper():
                     mapFound = True
                     if not args.json:
                         for eachAddress in eachItem['currentCidrs']:
-                            print(eachAddress)
+                            rowData = []
+                            rowData.append(eachItem['ruleName'])
+                            rowData.append(eachAddress)
+                            table.add_row(rowData)
+                        print(table)
                     else:
                         print(json.dumps(eachItem, indent=4))
             elif args.map_id:
@@ -299,7 +307,11 @@ def list_cidrs(args):
                     mapFound = True
                     if not args.json:
                         for eachAddress in eachItem['currentCidrs']:
-                            print(eachAddress)
+                            rowData = []
+                            rowData.append(eachItem['ruleName'])
+                            rowData.append(eachAddress)
+                            table.add_row(rowData)
+                        print(table)
                     else:
                         print(json.dumps(eachItem, indent=4))
 
