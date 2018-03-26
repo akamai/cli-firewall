@@ -44,7 +44,7 @@ This is the main program that wraps this functionality in a command line utility
 ## akamai-site-shield
 This is the main program that wraps this functionality in a command line utility:
 * [list-maps](#list-maps)
-* [list-cidrs](#list-cidrs)
+* [list-cidrs](#list-cidrs-1)
 * [acknowledge](#acknowledge)
 
 
