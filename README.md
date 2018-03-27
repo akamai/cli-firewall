@@ -1,5 +1,5 @@
 # cli-firewall-rules
-Provides a way to interact with Firewall Rules and Site Shield related information via Open APIs. Functionality includes viewing firewall rules services, subscribing and unsubscribing to firewall rules services, viewing and acknowledging Site Shield maps, and listing CIDR blocks for each service.
+Provides a way to interact with Firewall Rules and Site Shield related information via Open APIs. Functionality includes viewing firewall rules services, subscribing and unsubscribing to firewall rules services, viewing and acknowledging Site Shield maps, and listing CIDR blocks.
 
 ## Local Install
 * Python 3+
@@ -33,7 +33,7 @@ This version includes the following functionality:
 * List CIDRs for a specified Site Shield map
 * Acknowledge a pending Site Shield map update
 
-## akamai-firewall-rules
+## akamai-firewall
 This is the main program that wraps this functionality in a command line utility:
 * [list-services](#list-services)
 * [list-subscriptions](#list-subscriptions)
