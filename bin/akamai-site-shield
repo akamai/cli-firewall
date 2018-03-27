@@ -96,7 +96,7 @@ def cli():
         prog += " [command]"
 
     parser = argparse.ArgumentParser(
-        description='Akamai CLI for Site Shield and Firewall Rules Notifications',
+        description='Akamai CLI for Site-Shield',
         add_help=False,
         prog=prog)
     parser.add_argument(
@@ -403,7 +403,7 @@ def acknowledge(args):
 def get_prog_name():
     prog = os.path.basename(sys.argv[0])
     if os.getenv("AKAMAI_CLI"):
-        prog = "akamai firewall"
+        prog = "akamai site-shield"
     return prog
 
 
