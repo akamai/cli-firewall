@@ -96,7 +96,7 @@ def cli():
         prog += " [command]"
 
     parser = argparse.ArgumentParser(
-        description='Akamai CLI for Site Shield and Firewall Rules Notifications',
+        description='Akamai CLI for Firewall Rules',
         add_help=False,
         prog=prog)
     parser.add_argument(
