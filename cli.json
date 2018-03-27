@@ -5,15 +5,15 @@
   "commands": [
     {
       "name": "firewall",
-      "aliases": ["firewall"],
+      "aliases": ["fw"],
       "version": "0.1.0",
-      "description": "Access details of maps, subscriptions, firewall notification lists and SS Maps"
+      "description": "Access Akamai Firewall Rules Services, Subscriptions, and CIDRs"
     },
     {
       "name": "site-shield",
       "aliases": ["ss"],
       "version": "0.1.0",
-      "description": "Access details of SS Maps and Acknowledge SS changes"
+      "description": "Access details of Site-Shield Maps, CIDRs and acknowledgement"
     }
   ]
 }
