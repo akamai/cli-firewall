@@ -1,4 +1,4 @@
-# cli-firewall-rules
+# cli-firewall
 Provides a way to interact with Firewall Rules and Site Shield related information via Open APIs. Functionality includes viewing firewall rules services, subscribing and unsubscribing to firewall rules services, viewing and acknowledging Site Shield maps, and listing CIDR blocks.
 
 ## Local Install
