@@ -1,4 +1,5 @@
 {
+  "name": "akamai/firewall",
   "requirements": {
     "python": "3.0.0"
   },
