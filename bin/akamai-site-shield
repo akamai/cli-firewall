@@ -177,7 +177,7 @@ def create_sub_command(
             del arg["name"]
             required.add_argument("--" + name,
                                   required=True,
-                                  **arg,
+                                  **arg
                                   )
 
     optional = action.add_argument_group("optional arguments")
@@ -189,12 +189,11 @@ def create_sub_command(
                 optional.add_argument(
                     "--" + name,
                     required=False,
-                    **arg,
-                    action="store_true")
+                    **arg)
             else:
                 optional.add_argument("--" + name,
                                       required=False,
-                                      **arg,
+                                      **arg
                                       )
 
     optional.add_argument(
