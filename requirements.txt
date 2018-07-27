@@ -1,4 +1,4 @@
-edgegrid-python==1.0.10
+edgegrid-python==1.1.1
 requests==2.14.2
 prettytable==0.7.2
 configparser==3.5.0
