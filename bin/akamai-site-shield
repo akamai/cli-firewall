@@ -214,12 +214,17 @@ def create_sub_command(
         help="DEBUG mode to generate additional logs for troubleshooting",
         action="store_true")
 
+    optional.add_argument(
+        "--account-key",
+        help="Account Switch Key",
+        default="")
+
     return action
 
 
 def list_maps(args):
     base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url)
+    fire_shield_object = fireShield(base_url, args.account_key)
     root_logger.info('Fetching Site Shield Maps...')
 
     list_maps_response = fire_shield_object.list_maps(session)
@@ -277,7 +282,7 @@ def list_cidrs(args):
         root_logger.info('Specify either of --map-id or --map-name.')
         exit(-1)
     base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url)
+    fire_shield_object = fireShield(base_url, args.account_key)
     root_logger.info('Fetching Site Shield CIDR blocks...\n')
 
     list_maps_response = fire_shield_object.list_maps(session)
@@ -301,6 +306,8 @@ def list_cidrs(args):
                             table.add_row(rowData)
                         print(table)
                     else:
+                        if 'proposedCidrs' in eachItem:
+                            del eachItem['proposedCidrs']
                         print(json.dumps(eachItem, indent=4))
             elif args.map_id:
                 if str(eachItem['id']) == str(args.map_id):
@@ -313,6 +320,8 @@ def list_cidrs(args):
                             table.add_row(rowData)
                         print(table)
                     else:
+                        if 'proposedCidrs' in eachItem:
+                            del eachItem['proposedCidrs']
                         print(json.dumps(eachItem, indent=4))
 
         if mapFound is False:
@@ -335,7 +344,7 @@ def acknowledge(args):
         root_logger.info('Specify either of --map-id or --map-name.')
         exit(-1)
     base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url)
+    fire_shield_object = fireShield(base_url, args.account_key)
     root_logger.info('Fetching Site Shield maps...\n')
 
     list_maps_response = fire_shield_object.list_maps(session)
