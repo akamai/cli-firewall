@@ -270,7 +270,7 @@ def list_maps(args):
     else:
         root_logger.info(
             'There was error in fetching response. Use --debug for more information.')
-        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+        root_logger.debug(json.dumps(list_maps_response.json(), indent=4))
 
 
 def list_cidrs(args):
@@ -385,7 +385,7 @@ def acknowledge(args):
             else:
                 root_logger.info(
                     'There was error in fetching list_maps_response. Use --debug for more information.')
-                root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+                root_logger.debug(json.dumps(list_maps_response.json(), indent=4))
 
             if update_pending == 1:
                 root_logger.info('Acknowledging Site Shield map...\n')

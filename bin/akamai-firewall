@@ -287,7 +287,7 @@ def list_subscriptions(args):
     else:
         root_logger.info(
             'There was error in fetching response. Use --debug for more information.')
-        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+        root_logger.debug(json.dumps(list_subscriptions_response.json(), indent=4))
 
 
 def subscribe(args):
@@ -352,7 +352,7 @@ def subscribe(args):
                 'There was error in fetching subscription response. Use --debug for more information.')
             root_logger.debug(
                 json.dumps(
-                    list_services_response.json(),
+                    list_subscriptions_response.json(),
                     indent=4))
 
 
@@ -411,7 +411,7 @@ def unsubscribe(args):
     else:
         root_logger.info(
             'There was error in fetching subscription response. Use --debug for more information.')
-        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+        root_logger.debug(json.dumps(list_subscriptions_response.json(), indent=4))
 
 
 def process_json_output(json_response):
