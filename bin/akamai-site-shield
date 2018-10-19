@@ -298,30 +298,40 @@ def list_cidrs(args):
             if args.map_name:
                 if eachItem['ruleName'].upper() == args.map_name.upper():
                     mapFound = True
+                    if eachItem['acknowledged'] is True:
+                        ip_block = eachItem['currentCidrs']
+                    else:
+                        ip_block = eachItem['proposedCidrs']
+                        #Delete the currentCidrs so that it is not displayed in JSON
+                        if 'currentCidrs' in eachItem:
+                            del eachItem['currentCidrs']
                     if not args.json:
-                        for eachAddress in eachItem['currentCidrs']:
+                        for eachAddress in ip_block:
                             rowData = []
                             rowData.append(eachItem['ruleName'])
                             rowData.append(eachAddress)
                             table.add_row(rowData)
                         print(table)
                     else:
-                        if 'proposedCidrs' in eachItem:
-                            del eachItem['proposedCidrs']
                         print(json.dumps(eachItem, indent=4))
             elif args.map_id:
                 if str(eachItem['id']) == str(args.map_id):
                     mapFound = True
+                    if eachItem['acknowledged'] is True:
+                        ip_block = eachItem['currentCidrs']
+                    else:
+                        ip_block = eachItem['proposedCidrs']
+                        #Delete the currentCidrs so that it is not displayed in JSON
+                        if 'currentCidrs' in eachItem:
+                            del eachItem['currentCidrs']
                     if not args.json:
-                        for eachAddress in eachItem['currentCidrs']:
+                        for eachAddress in ip_block:
                             rowData = []
                             rowData.append(eachItem['ruleName'])
                             rowData.append(eachAddress)
                             table.add_row(rowData)
                         print(table)
                     else:
-                        if 'proposedCidrs' in eachItem:
-                            del eachItem['proposedCidrs']
                         print(json.dumps(eachItem, indent=4))
 
         if mapFound is False:
