@@ -302,9 +302,6 @@ def list_cidrs(args):
                         ip_block = eachItem['currentCidrs']
                     else:
                         ip_block = eachItem['proposedCidrs']
-                        #Delete the currentCidrs so that it is not displayed in JSON
-                        if 'currentCidrs' in eachItem:
-                            del eachItem['currentCidrs']
                     if not args.json:
                         for eachAddress in ip_block:
                             rowData = []
@@ -321,9 +318,6 @@ def list_cidrs(args):
                         ip_block = eachItem['currentCidrs']
                     else:
                         ip_block = eachItem['proposedCidrs']
-                        #Delete the currentCidrs so that it is not displayed in JSON
-                        if 'currentCidrs' in eachItem:
-                            del eachItem['currentCidrs']
                     if not args.json:
                         for eachAddress in ip_block:
                             rowData = []
