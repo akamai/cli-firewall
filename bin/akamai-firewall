@@ -226,12 +226,17 @@ def create_sub_command(
         help="DEBUG mode to generate additional logs for troubleshooting",
         action="store_true")
 
+    optional.add_argument(
+        "--account-key",
+        help="Account Switch Key",
+        default="")
+
     return action
 
 
 def list_services(args):
     base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url)
+    fire_shield_object = fireShield(base_url, args.account_key)
     list_services_response = fire_shield_object.list_services(session)
     if list_services_response.status_code == 200:
         #root_logger.info(json.dumps(list_services_response.json(), indent=4))
@@ -257,7 +262,7 @@ def list_services(args):
 
 def list_subscriptions(args):
     base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url)
+    fire_shield_object = fireShield(base_url, args.account_key)
     list_subscriptions_response = fire_shield_object.list_subscriptions(session)
     #root_logger.info(json.dumps(list_subscriptions_response.json(), indent=4))
     if list_subscriptions_response.status_code == 200:
@@ -282,7 +287,7 @@ def list_subscriptions(args):
     else:
         root_logger.info(
             'There was error in fetching response. Use --debug for more information.')
-        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+        root_logger.debug(json.dumps(list_subscriptions_response.json(), indent=4))
 
 
 def subscribe(args):
@@ -295,7 +300,7 @@ def subscribe(args):
         exit(-1)
 
     base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url)
+    fire_shield_object = fireShield(base_url, args.account_key)
     root_logger.info('Validating service name...')
 
     validService = False
@@ -347,7 +352,7 @@ def subscribe(args):
                 'There was error in fetching subscription response. Use --debug for more information.')
             root_logger.debug(
                 json.dumps(
-                    list_services_response.json(),
+                    list_subscriptions_response.json(),
                     indent=4))
 
 
@@ -361,7 +366,7 @@ def unsubscribe(args):
         exit(-1)
 
     base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url)
+    fire_shield_object = fireShield(base_url, args.account_key)
     root_logger.info('Validating service name...')
 
     list_subscriptions_response = fire_shield_object.list_subscriptions(session)
@@ -406,7 +411,7 @@ def unsubscribe(args):
     else:
         root_logger.info(
             'There was error in fetching subscription response. Use --debug for more information.')
-        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+        root_logger.debug(json.dumps(list_subscriptions_response.json(), indent=4))
 
 
 def process_json_output(json_response):
@@ -428,15 +433,19 @@ def process_json_output(json_response):
 
     #Remove the un-necessary items
     for every_final_block in collated_list:
-        del every_final_block['cidr']
-        del every_final_block['cidrMask']
-        del every_final_block['creationDate']
-        del every_final_block['effectiveDate']
-        del every_final_block['changeDate']
-        del every_final_block['lastAction']
-        del every_final_block['minIp']
-        del every_final_block['maxIp']
-        del every_final_block['port']
+        try:
+            del every_final_block['cidr']
+            del every_final_block['cidrMask']
+            del every_final_block['creationDate']
+            del every_final_block['effectiveDate']
+            del every_final_block['changeDate']
+            del every_final_block['lastAction']
+            del every_final_block['minIp']
+            del every_final_block['maxIp']
+            del every_final_block['port']
+            del every_final_block['proposedCidrs']
+        except KeyError:
+            pass
 
     #Finally print the items
     print(json.dumps(collated_list, indent=4))
@@ -444,7 +453,7 @@ def process_json_output(json_response):
 
 def list_cidrs(args):
     base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url)
+    fire_shield_object = fireShield(base_url, args.account_key)
     root_logger.info('Fetching CIDR blocks...')
     list_cidrResponse = fire_shield_object.list_cidr(session)
     #root_logger.info(json.dumps(list_cidrResponse.json(), indent=4))
