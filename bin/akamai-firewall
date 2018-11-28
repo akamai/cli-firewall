@@ -426,8 +426,9 @@ def process_json_output(json_response):
                     if 'IPs' in every_block_of_collated_list:
                         every_block_of_collated_list['IPs'].append(every_block['cidr'] + every_block['cidrMask'])
                     else:
-                        every_block_of_collated_list['IPs']= [every_block['cidr'] + every_block['cidrMask']]
+                        every_block_of_collated_list['IPs'] = [every_block['cidr'] + every_block['cidrMask']]
         else:
+            every_block['IPs'] = [every_block['cidr'] + every_block['cidrMask']]
             collated_list.append(every_block)
             serviceid_set.add(every_block['serviceId'])
 
