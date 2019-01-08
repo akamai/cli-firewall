@@ -233,6 +233,7 @@ def list_maps(args):
         #root_logger.info(json.dumps(list_maps_response.json(), indent=4))
         table = PrettyTable(['Map ID',
                              'Map Name',
+                             'Map Alias',
                              'Status',
                              'Last Acknowledged By',
                              'Acknowledge Date',
@@ -251,6 +252,7 @@ def list_maps(args):
 
             mapId = eachItem['id']
             ruleName = eachItem['ruleName']
+            mapAlias = eachItem['mapAlias']
             acknowledgedBy = eachItem['acknowledgedBy']
             acknowledgedOn = eachItem['acknowledgedOn']
             acknowledgedOn = '{0:%Y-%m-%d %H:%M:%S}'.format(
@@ -260,6 +262,7 @@ def list_maps(args):
                 contacts = eachContact + ' ' + contacts
             rowData.append(mapId)
             rowData.append(ruleName)
+            rowData.append(mapAlias)
             rowData.append(status)
             rowData.append(acknowledgedBy)
             rowData.append(acknowledgedOn)
