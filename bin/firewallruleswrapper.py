@@ -17,7 +17,7 @@ class fireShield(object):
     def __init__(self, access_hostname,account_switch_key):
         self.access_hostname = access_hostname
         self.access_hostname = access_hostname
-        if account_switch_key != '':
+        if account_switch_key != None:
             self.account_switch_key = '&accountSwitchKey=' + account_switch_key
         else:
             self.account_switch_key = ''
