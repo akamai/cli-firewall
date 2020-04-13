@@ -11,16 +11,13 @@ Copyright 2017 Akamai Technologies, Inc. All Rights Reserved.
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-
 """
 This code leverages akamai OPEN API. to control Certificates deployed in Akamai Network.
 In case you need quick explanation contact the initiators.
 Initiators: vbhat@akamai.com, aetsai@akamai.com, mkilmer@akamai.com
 """
-
 import json
 from firewallruleswrapper import fireShield
-import argparse
 import requests
 import os
 import logging
@@ -29,7 +26,7 @@ import sys
 from prettytable import PrettyTable
 from akamai.edgegrid import EdgeGridAuth, EdgeRc
 import datetime
-
+import click
 
 PACKAGE_VERSION = "0.1.0"
 
@@ -54,177 +51,36 @@ root_logger.addHandler(console_handler)
 # Set Log Level to DEBUG, INFO, WARNING, ERROR, CRITICAL
 root_logger.setLevel(logging.INFO)
 
+class Config(object):
+    def __init__(self):
+        pass
+pass_config = click.make_pass_decorator(Config, ensure=True)
 
-def init_config(edgerc_file, section):
-    if not edgerc_file:
-        if not os.getenv("AKAMAI_EDGERC"):
-            edgerc_file = os.path.join(os.path.expanduser("~"), '.edgerc')
-        else:
-            edgerc_file = os.getenv("AKAMAI_EDGERC")
-
-    if not os.access(edgerc_file, os.R_OK):
-        root_logger.error("Unable to read edgerc file \"%s\"" % edgerc_file)
-        exit(1)
-
-    if not section:
-        if not os.getenv("AKAMAI_EDGERC_SECTION"):
-            section = "site-shield"
-        else:
-            section = os.getenv("AKAMAI_EDGERC_SECTION")
-
-    try:
-        edgerc = EdgeRc(edgerc_file)
-        base_url = edgerc.get(section, 'host')
-
-        session = requests.Session()
-        session.auth = EdgeGridAuth.from_edgerc(edgerc, section)
-
-        return base_url, session
-    except configparser.NoSectionError:
-        root_logger.error("Edgerc section \"%s\" not found" % section)
-        exit(1)
-    except Exception:
-        root_logger.info(
-            "Unknown error occurred trying to read edgerc file (%s)" %
-            edgerc_file)
-        exit(1)
-
-
-def cli():
-    prog = get_prog_name()
-    if len(sys.argv) == 1:
-        prog += " [command]"
-
-    parser = argparse.ArgumentParser(
-        description='Akamai CLI for Site-Shield',
-        add_help=False,
-        prog=prog)
-    parser.add_argument(
-        '--version',
-        action='version',
-        version='%(prog)s ' +
-                PACKAGE_VERSION)
-
-    subparsers = parser.add_subparsers(
-        title='Commands', dest="command", metavar="")
-
-    actions = {}
-
-    subparsers.add_parser(
-        name="help",
-        help="Show available help",
-        add_help=False).add_argument(
-        'args',
-        metavar="",
-        nargs=argparse.REMAINDER)
-
-    actions["list_maps"] = create_sub_command(
-        subparsers, "list-maps",
-        "List the available Site Shield maps",
-        None,
-        None)
-
-    actions["list_cidrs"] = create_sub_command(
-        subparsers, "list-cidrs",
-        "List the CIDRs for a specific Site Shield map ",
-        [{"name": "map-name", "help": "Name of the map within SINGLE quotes"},
-         {"name": "map-id", "help": "ID of the map"},
-         {"name": "json", "help": "output format in json"}],
-        None)
-
-    actions["acknowledge"] = create_sub_command(
-        subparsers, "acknowledge",
-        "Acknowledge a pending Site Shield map update ",
-        [{"name": "map-name", "help": "Name of the map within SINGLE quotes"},
-         {"name": "map-id", "help": "ID of the map"}],
-        None)
-
-    args = parser.parse_args()
-
-    if len(sys.argv) <= 1:
-        parser.print_help()
-        return 0
-
-    if args.command == "help":
-        if len(args.args) > 0:
-            if actions[args.args[0]]:
-                actions[args.args[0]].print_help()
-        else:
-            parser.prog = get_prog_name() + " help [command]"
-            parser.print_help()
-        return 0
-
-    # Override log level if user wants to run in debug mode
-    # Set Log Level to DEBUG, INFO, WARNING, ERROR, CRITICAL
-    if args.debug:
+@click.group()
+@click.option('--edgerc', default=os.path.join(os.path.expanduser("~"),'.edgerc'),help='Location of the credentials file [$AKAMAI_EDGERC]', required=False)
+@click.option('--section', help='Section of the credentials file [$AKAMAI_EDGERC_SECTION]', required=False)
+@click.option('--account-key', help='Account Switch Key', required=False)
+@click.option('--debug', help='DEBUG mode to generate additional logs for troubleshooting', is_flag=True, required=False)
+@click.version_option(version=PACKAGE_VERSION)
+@pass_config
+def cli(config, edgerc, section, account_key, debug):
+    '''
+    Akamai CLI for Firewall Rules
+    '''
+    config.edgerc = edgerc
+    config.section = section
+    config.account_key = account_key
+    if debug:
         root_logger.setLevel(logging.DEBUG)
 
-    return getattr(sys.modules[__name__], args.command.replace("-", "_"))(args)
-
-
-def create_sub_command(
-        subparsers,
-        name,
-        help,
-        optional_arguments=None,
-        required_arguments=None):
-    action = subparsers.add_parser(name=name, help=help, add_help=False)
-
-    if required_arguments:
-        required = action.add_argument_group("required arguments")
-        for arg in required_arguments:
-            name = arg["name"]
-            del arg["name"]
-            required.add_argument("--" + name,
-                                  required=True,
-                                  **arg,
-                                  )
-
-    optional = action.add_argument_group("optional arguments")
-    if optional_arguments:
-        for arg in optional_arguments:
-            name = arg["name"]
-            del arg["name"]
-            if name == 'force' or name == 'json':
-                optional.add_argument(
-                    "--" + name,
-                    required=False,
-                    **arg,
-                    action="store_true")
-            else:
-                optional.add_argument("--" + name,
-                                      required=False,
-                                      **arg,
-                                      )
-
-    optional.add_argument(
-        "--edgerc",
-        help="Location of the credentials file [$AKAMAI_EDGERC]",
-        default=os.path.join(
-            os.path.expanduser("~"),
-            '.edgerc'))
-
-    optional.add_argument(
-        "--section",
-        help="Section of the credentials file [$AKAMAI_EDGERC_SECTION]",
-        default="site-shield")
-
-    optional.add_argument(
-        "--debug",
-        help="DEBUG mode to generate additional logs for troubleshooting",
-        action="store_true")
-
-    optional.add_argument(
-        "--account-key",
-        help="Account Switch Key",
-        default="")
-
-    return action
-
-
-def list_maps(args):
-    base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url, args.account_key)
+@cli.command()
+@pass_config
+def list_maps(config):
+    '''
+    List the available Site Shield maps
+    '''
+    base_url, session = init_config(config.edgerc, config.section)
+    fire_shield_object = fireShield(base_url, config.account_key)
     root_logger.info('Fetching Site Shield Maps...')
 
     list_maps_response = fire_shield_object.list_maps(session)
@@ -275,17 +131,24 @@ def list_maps(args):
             'There was error in fetching response. Use --debug for more information.')
         root_logger.debug(json.dumps(list_maps_response.json(), indent=4))
 
-
-def list_cidrs(args):
-    if args.map_id and args.map_name:
+@cli.command()
+@click.option('--map-name', help='Name of the map within SINGLE quotes', required=False)
+@click.option('--map-id', help='ID of the map', required=False)
+@click.option('--json', help='Output format in json', required=False)
+@pass_config
+def list_cidrs(config, map_name, map_id, json):
+    '''
+    List the CIDRs for a specific Site Shield map
+    '''
+    if map_id and map_name:
         root_logger.info(
             'You cannot specify both --map-id and --map-name. Please choose one.')
         exit(-1)
-    if not args.map_id and not args.map_name:
+    if not map_id and not map_name:
         root_logger.info('Specify either of --map-id or --map-name.')
         exit(-1)
-    base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url, args.account_key)
+    base_url, session = init_config(config.edgerc, config.section)
+    fire_shield_object = fireShield(base_url, config.account_key)
     root_logger.info('Fetching Site Shield CIDR blocks...\n')
 
     list_maps_response = fire_shield_object.list_maps(session)
@@ -298,14 +161,14 @@ def list_cidrs(args):
         table.align = "l"
 
         for eachItem in list_maps_response.json()['siteShieldMaps']:
-            if args.map_name:
-                if eachItem['ruleName'].upper() == args.map_name.upper():
+            if map_name:
+                if eachItem['ruleName'].upper() == map_name.upper():
                     mapFound = True
                     if eachItem['acknowledged'] is True:
                         ip_block = eachItem['currentCidrs']
                     else:
                         ip_block = eachItem['proposedCidrs']
-                    if not args.json:
+                    if not json:
                         for eachAddress in ip_block:
                             rowData = []
                             rowData.append(eachItem['ruleName'])
@@ -314,14 +177,14 @@ def list_cidrs(args):
                         print(table)
                     else:
                         print(json.dumps(eachItem, indent=4))
-            elif args.map_id:
-                if str(eachItem['id']) == str(args.map_id):
+            elif map_id:
+                if str(eachItem['id']) == str(map_id):
                     mapFound = True
                     if eachItem['acknowledged'] is True:
                         ip_block = eachItem['currentCidrs']
                     else:
                         ip_block = eachItem['proposedCidrs']
-                    if not args.json:
+                    if not json:
                         for eachAddress in ip_block:
                             rowData = []
                             rowData.append(eachItem['ruleName'])
@@ -342,33 +205,37 @@ def list_cidrs(args):
         root_logger.debug(json.dumps(list_maps_response.json(), indent=4))
 
 
-def acknowledge(args):
-    if args.map_id and args.map_name:
+@cli.command()
+@click.option('--map-name', help='Name of the map within SINGLE quotes', required=False)
+@click.option('--map-id', help='ID of the map', required=False)
+@pass_config
+def acknowledge(config, map_name, map_id):
+    '''
+    Acknowledge a pending Site Shield map update
+    '''
+    if map_id and map_name:
         root_logger.info(
             'You cannot specify both --map-id and --map-name. Please choose one.')
         exit(-1)
-    if not args.map_id and not args.map_name:
+    if not map_id and not map_name:
         root_logger.info('Specify either of --map-id or --map-name.')
         exit(-1)
-    base_url, session = init_config(args.edgerc, args.section)
-    fire_shield_object = fireShield(base_url, args.account_key)
+    base_url, session = init_config(config.edgerc, config.section)
+    fire_shield_object = fireShield(base_url, config.account_key)
     root_logger.info('Fetching Site Shield maps...\n')
-
     list_maps_response = fire_shield_object.list_maps(session)
-
     if list_maps_response.status_code == 200:
         #root_logger.info(json.dumps(list_maps_response.json(), indent=4))
         mapFound = False
         for eachItem in list_maps_response.json()['siteShieldMaps']:
-            if args.map_name:
-                if eachItem['ruleName'].upper() == args.map_name.upper():
+            if map_name:
+                if eachItem['ruleName'].upper() == map_name.upper():
                     mapFound = True
                     mapId = eachItem['id']
-            elif args.map_id:
-                if str(eachItem['id']) == str(args.map_id):
+            elif map_id:
+                if str(eachItem['id']) == str(map_id):
                     mapFound = True
                     mapId = eachItem['id']
-
         if mapFound is False:
             root_logger.info(
                 'Unable to find the map. Please check the --map-name or --map-id')
@@ -415,6 +282,36 @@ def acknowledge(args):
             'There was error in fetching response. Use --debug for more information.')
         root_logger.info(json.dumps(list_maps_response.json(), indent=4))
 
+def init_config(edgerc_file, section):
+    if not edgerc_file:
+        if not os.getenv("AKAMAI_EDGERC"):
+            edgerc_file = os.path.join(os.path.expanduser("~"), '.edgerc')
+        else:
+            edgerc_file = os.getenv("AKAMAI_EDGERC")
+    if not os.access(edgerc_file, os.R_OK):
+        root_logger.error("Unable to read edgerc file \"%s\"" % edgerc_file)
+        exit(1)
+    if not section:
+        if not os.getenv("AKAMAI_EDGERC_SECTION"):
+            section = "site-shield"
+        else:
+            section = os.getenv("AKAMAI_EDGERC_SECTION")
+    try:
+        edgerc = EdgeRc(edgerc_file)
+        base_url = edgerc.get(section, 'host')
+
+        session = requests.Session()
+        session.auth = EdgeGridAuth.from_edgerc(edgerc, section)
+
+        return base_url, session
+    except configparser.NoSectionError:
+        root_logger.error("Edgerc section \"%s\" not found" % section)
+        exit(1)
+    except Exception:
+        root_logger.info(
+            "Unknown error occurred trying to read edgerc file (%s)" %
+            edgerc_file)
+        exit(1)
 
 def get_prog_name():
     prog = os.path.basename(sys.argv[0])
@@ -422,13 +319,10 @@ def get_prog_name():
         prog = "akamai site-shield"
     return prog
 
-
 def get_cache_dir():
     if os.getenv("AKAMAI_CLI_CACHE_DIR"):
         return os.getenv("AKAMAI_CLI_CACHE_DIR")
-
     return os.curdir
-
 
 # Final or common Successful exit
 if __name__ == '__main__':
