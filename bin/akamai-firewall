@@ -57,7 +57,7 @@ class Config(object):
         pass
 pass_config = click.make_pass_decorator(Config, ensure=True)
 
-@click.group()
+@click.group(context_settings={'help_option_names':['-h','--help']})
 @click.option('--edgerc', default=os.path.join(os.path.expanduser("~"),'.edgerc'),help='Location of the credentials file [$AKAMAI_EDGERC]', required=False)
 @click.option('--section', help='Section of the credentials file [$AKAMAI_EDGERC_SECTION]', required=False)
 @click.option('--account-key', help='Account Switch Key', required=False)
@@ -73,6 +73,14 @@ def cli(config, edgerc, section, account_key, debug):
     config.account_key = account_key
     if debug:
         root_logger.setLevel(logging.DEBUG)
+
+@cli.command()
+@click.pass_context
+def help(ctx):
+    '''
+    Show help and exit
+    '''
+    print(ctx.parent.get_help())
 
 @cli.command()
 @pass_config
