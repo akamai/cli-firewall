@@ -273,7 +273,7 @@ def unsubscribe(config, service_name, service_id, email):
 @cli.command()
 @click.option('--service-name', help='Name of the service within SINGLE quotes', required=False)
 @click.option('--service-id', help='Id of the service', required=False)
-@click.option('--json', help='output format in json', required=False)
+@click.option('--json', help='output format in json', is_flag=True, required=False)
 @pass_config
 def list_cidrs(config, service_name, service_id, json):
     '''
