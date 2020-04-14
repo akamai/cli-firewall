@@ -137,7 +137,7 @@ def list_maps(config):
 @cli.command()
 @click.option('--map-name', help='Name of the map within SINGLE quotes', required=False)
 @click.option('--map-id', help='ID of the map', required=False)
-@click.option('--json', help='Output format in json', required=False)
+@click.option('--json', help='Output format in json', is_flag=True, required=False)
 @pass_config
 def list_cidrs(config, map_name, map_id, json):
     '''
