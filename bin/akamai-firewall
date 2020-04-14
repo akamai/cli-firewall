@@ -273,9 +273,9 @@ def unsubscribe(config, service_name, service_id, email):
 @cli.command()
 @click.option('--service-name', help='Name of the service within SINGLE quotes', required=False)
 @click.option('--service-id', help='Id of the service', required=False)
-@click.option('--json', help='output format in json', is_flag=True, required=False)
+@click.option('--json','optjson', help='output format in json', is_flag=True, required=False)
 @pass_config
-def list_cidrs(config, service_name, service_id, json):
+def list_cidrs(config, service_name, service_id, optjson):
     '''
     List the CIDRs for current subscription or a specific firewall rules service
     '''
@@ -297,7 +297,7 @@ def list_cidrs(config, service_name, service_id, json):
             rowData = []
             if service_name:
                 if service_name.upper() == eachItem['serviceName'].upper():
-                    if not json:
+                    if not optjson:
                         rowData.append(eachItem['serviceName'])
                         rowData.append(
                             str(eachItem['cidr']) + str(eachItem['cidrMask']))
@@ -308,7 +308,7 @@ def list_cidrs(config, service_name, service_id, json):
                         specific_service_json.append(eachItem)
             elif service_id:
                 if str(service_id) == str(eachItem['serviceId']):
-                    if not json:
+                    if not optjson:
                         rowData.append(eachItem['serviceName'])
                         rowData.append(
                             str(eachItem['cidr']) + str(eachItem['cidrMask']))
@@ -318,7 +318,7 @@ def list_cidrs(config, service_name, service_id, json):
                     else:
                         specific_service_json.append(eachItem)
             else:
-                if not json:
+                if not optjson:
                     rowData.append(eachItem['serviceName'])
                     rowData.append(
                         str(eachItem['cidr']) + str(eachItem['cidrMask']))
@@ -327,7 +327,7 @@ def list_cidrs(config, service_name, service_id, json):
                     table.add_row(rowData)
                 else:
                     specific_service_json.append(eachItem)
-        if not json:
+        if not optjson:
             print(table.get_string(sortby="Service Name"))
         else:
             process_json_output(specific_service_json)
