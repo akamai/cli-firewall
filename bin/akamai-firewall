@@ -61,18 +61,15 @@ pass_config = click.make_pass_decorator(Config, ensure=True)
 @click.option('--edgerc', default=os.path.join(os.path.expanduser("~"),'.edgerc'),help='Location of the credentials file [$AKAMAI_EDGERC]', required=False)
 @click.option('--section', help='Section of the credentials file [$AKAMAI_EDGERC_SECTION]', required=False)
 @click.option('--account-key', help='Account Switch Key', required=False)
-@click.option('--debug', help='DEBUG mode to generate additional logs for troubleshooting', is_flag=True, required=False)
 @click.version_option(version=PACKAGE_VERSION)
 @pass_config
-def cli(config, edgerc, section, account_key, debug):
+def cli(config, edgerc, section, account_key):
     '''
     Akamai CLI for Firewall Rules
     '''
     config.edgerc = edgerc
     config.section = section
     config.account_key = account_key
-    if debug:
-        root_logger.setLevel(logging.DEBUG)
 
 @cli.command()
 @click.pass_context
@@ -108,9 +105,7 @@ def list_services(config):
             table.add_row(rowData)
         root_logger.info(table)
     else:
-        root_logger.info(
-            'There was error in fetching response. Use --debug for more information.')
-        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+        root_logger.info(json.dumps(list_services_response.json(), indent=4))
 
 @cli.command()
 @pass_config
@@ -141,9 +136,7 @@ def list_subscriptions(config):
             table.add_row(rowData)
         root_logger.info(table)
     else:
-        root_logger.info(
-            'There was error in fetching response. Use --debug for more information.')
-        root_logger.debug(json.dumps(list_subscriptions_response.json(), indent=4))
+        root_logger.info(json.dumps(list_subscriptions_response.json(), indent=4))
 
 @cli.command()
 @click.option('--service-name', help='Name of the service to be subscribed to within SINGLE quotes', required=False)
@@ -179,9 +172,7 @@ def subscribe(config, service_name, service_id, email):
                     serviceId = eachItem['serviceId']
                     break
     else:
-        root_logger.info(
-            'There was error in fetching services response. Use --debug for more information.')
-        root_logger.debug(json.dumps(list_services_response.json(), indent=4))
+        root_logger.info(json.dumps(list_services_response.json(), indent=4))
 
     if validService is False:
         root_logger.info(
@@ -209,12 +200,7 @@ def subscribe(config, service_name, service_id, email):
                         update_subscriptionsRespose.json(),
                         indent=4))
         else:
-            root_logger.info(
-                'There was error in fetching subscription response. Use --debug for more information.')
-            root_logger.debug(
-                json.dumps(
-                    list_subscriptions_response.json(),
-                    indent=4))
+            root_logger.info(json.dumps(list_subscriptions_response.json(), indent=4))
 
 @cli.command()
 @click.option('--service-name', help='Name of the service to be unsubscribed from within SINGLE quotes', required=False)
@@ -274,9 +260,7 @@ def unsubscribe(config, service_name, service_id, email):
                 'Current subscription not found...\n')
             exit(-1)
     else:
-        root_logger.info(
-            'There was error in fetching subscription response. Use --debug for more information.')
-        root_logger.debug(json.dumps(list_subscriptions_response.json(), indent=4))
+        root_logger.info(json.dumps(list_subscriptions_response.json(), indent=4))
 
 @cli.command()
 @click.option('--service-name', help='Name of the service within SINGLE quotes', required=False)
@@ -340,9 +324,7 @@ def list_cidrs(config, service_name, service_id, optjson):
         else:
             process_json_output(specific_service_json)
     else:
-        root_logger.info(
-            'There was error in fetching response. Use --debug for more information.')
-        root_logger.debug(json.dumps(list_cidrResponse.json(), indent=4))
+        root_logger.info(json.dumps(list_cidrResponse.json(), indent=4))
 
 def init_config(edgerc_file, section):
     if not edgerc_file:
