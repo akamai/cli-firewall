@@ -113,9 +113,12 @@ def list_maps(config):
                 acknowledgedBy = eachItem['acknowledgedBy']
             else:
                 acknowledgedBy = ''
-            acknowledgedOn = eachItem['acknowledgedOn']
-            acknowledgedOn = '{0:%Y-%m-%d %H:%M:%S}'.format(
-                datetime.datetime.fromtimestamp(acknowledgedOn / 1000))
+            if "acknowledgedOn" in eachItem:
+                acknowledgedOn = eachItem['acknowledgedOn']
+                acknowledgedOn = '{0:%Y-%m-%d %H:%M:%S}'.format(
+                    datetime.datetime.fromtimestamp(acknowledgedOn / 1000))
+            else:
+                acknowledgedOn = ''
             contacts = ''
             for eachContact in eachItem['contacts']:
                 contacts = eachContact + ' ' + contacts
