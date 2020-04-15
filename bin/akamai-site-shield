@@ -28,7 +28,7 @@ from akamai.edgegrid import EdgeGridAuth, EdgeRc
 import datetime
 import click
 
-PACKAGE_VERSION = "0.1.0"
+PACKAGE_VERSION = "0.2.0"
 
 # Setup logging
 if not os.path.exists('logs'):
@@ -59,7 +59,7 @@ pass_config = click.make_pass_decorator(Config, ensure=True)
 @click.group(context_settings={'help_option_names':['-h','--help']})
 @click.option('--edgerc', default=os.path.join(os.path.expanduser("~"),'.edgerc'),help='Location of the credentials file [$AKAMAI_EDGERC]', required=False)
 @click.option('--section', help='Section of the credentials file [$AKAMAI_EDGERC_SECTION]', required=False)
-@click.option('--account-key', help='Account Switch Key', required=False)
+@click.option('--account-key', help='Account Key', required=False)
 @click.version_option(version=PACKAGE_VERSION)
 @pass_config
 def cli(config, edgerc, section, account_key):
@@ -74,7 +74,7 @@ def cli(config, edgerc, section, account_key):
 @click.pass_context
 def help(ctx):
     '''
-    Show help and exit
+    Show help information
     '''
     print(ctx.parent.get_help())
 
