@@ -47,6 +47,19 @@ This is the main program that wraps this functionality in a command line utility
 * [list-cidrs](#list-cidrs-1)
 * [acknowledge](#acknowledge)
 
+## Global Flags
+- `--edgerc value` — Location of the credentials file (default: "/Users/username") [$AKAMAI_EDGERC]
+- `--section value` — Section of the credentials file (default: "firewall" default: "site-shield") [$AKAMAI_EDGERC_SECTION]
+- `--help`, `-h` — show help
+- `--version`, `-v` — print the version
+
+```bash
+%  akamai firewall --section section list-services
+%  akamai site-shield --section section list-maps
+```
+
+akamai fw can also be used as alias for akamai firewall
+akamai ss can also be used as alias for akamai site-shield
 
 ### list-services
 List available firewall rules services available for subscription. A service must be subscribed to before CIDRs can be displayed for that service.
