@@ -171,3 +171,12 @@ The flags of interest are (please specify either --map-id or --map-name):
 --map-id <value>            	ID of desired Site Shield map
 --map-name <value>          	Name of desired Site Shield map
 ```
+
+# Contribution
+
+By submitting a contribution (the “Contribution”) to this project, and for good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, you (the “Assignor”) irrevocably convey, transfer, and assign the Contribution to the owner of the repository (the “Assignee”), and the Assignee hereby accepts, all of your right, title, and interest in and to the Contribution along with all associated copyrights, copyright registrations, and/or applications for registration and all issuances, extensions and renewals thereof (collectively, the “Assigned Copyrights”). You also assign all of your rights of any kind whatsoever accruing under the Assigned Copyrights provided by applicable law of any jurisdiction, by international treaties and conventions and otherwise throughout the world.
+
+# Notice
+
+Copyright 2020 – Akamai Technologies, Inc.
+All works contained in this repository, excepting those explicitly otherwise labeled, are the property of Akamai Technologies, Inc.
