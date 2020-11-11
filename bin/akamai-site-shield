@@ -158,7 +158,8 @@ def list_cidrs(config, map_name, map_id, optjson):
         exit(-1)
     base_url, session = init_config(config.edgerc, config.section)
     fire_shield_object = fireShield(base_url, config.account_key)
-    root_logger.info('Fetching Site Shield CIDR blocks...\n')
+    if not optjson:
+        root_logger.info('Fetching Site Shield CIDR blocks...\n')
 
     list_maps_response = fire_shield_object.list_maps(session)
 
