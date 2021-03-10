@@ -258,14 +258,14 @@ def acknowledge(config, map_name, map_id):
                     root_logger.info('No Site Shield maps found...')
                     exit(-1)
                 for eachItem in list_maps_response.json()['siteShieldMaps']:
-                    if str(eachItem['id']) == str(map_id):
+                    if str(eachItem['id']) == str(mapId):
                         if eachItem['acknowledged'] is False:
                             update_pending = 1
             else:
                 root_logger.info(json.dumps(list_maps_response.json(), indent=4))
 
             if update_pending == 1:
-                root_logger.info('Acknowledging Site Shield map...\n')
+                root_logger.info('Acknowledging Site Shield map: ' + str(mapId) + '\n')
                 acknowledge_mapResponse = fire_shield_object.acknowledge_map(
                     session, mapId)
                 if acknowledge_mapResponse.status_code == 200:
