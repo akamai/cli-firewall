@@ -28,7 +28,7 @@ from akamai.edgegrid import EdgeGridAuth, EdgeRc
 import datetime
 import click
 
-PACKAGE_VERSION = "0.2.0"
+PACKAGE_VERSION = "0.2.1"
 
 # Setup logging
 if not os.path.exists('logs'):
@@ -258,17 +258,14 @@ def acknowledge(config, map_name, map_id):
                     root_logger.info('No Site Shield maps found...')
                     exit(-1)
                 for eachItem in list_maps_response.json()['siteShieldMaps']:
-                    if eachItem['acknowledged'] is False:
-                        status = 'UPDATES PENDING'
-                        update_pending = 1
-                    else:
-                        status = 'Up-To-Date'
-                        update_pending = 0
+                    if str(eachItem['id']) == str(mapId):
+                        if eachItem['acknowledged'] is False:
+                            update_pending = 1
             else:
                 root_logger.info(json.dumps(list_maps_response.json(), indent=4))
 
             if update_pending == 1:
-                root_logger.info('Acknowledging Site Shield map...\n')
+                root_logger.info('Acknowledging Site Shield map: ' + str(mapId) + '\n')
                 acknowledge_mapResponse = fire_shield_object.acknowledge_map(
                     session, mapId)
                 if acknowledge_mapResponse.status_code == 200:
