@@ -25,10 +25,10 @@ import configparser
 import sys
 from prettytable import PrettyTable
 from akamai.edgegrid import EdgeGridAuth, EdgeRc
-import datetime
+import dateutil.parser
 import click
 
-PACKAGE_VERSION = "0.2.1"
+PACKAGE_VERSION = "0.2.2"
 
 # Setup logging
 if not os.path.exists('logs'):
@@ -119,9 +119,12 @@ def list_maps(config):
             else:
                 acknowledgedBy = ''
             if "acknowledgedOn" in eachItem:
-                acknowledgedOn = eachItem['acknowledgedOn']
-                acknowledgedOn = '{0:%Y-%m-%d %H:%M:%S}'.format(
-                    datetime.datetime.fromtimestamp(acknowledgedOn / 1000))
+                try:
+                    acknowledgedOn = eachItem['acknowledgedOn']
+                    acknowledgedOn = dateutil.parser.parse(acknowledgedOn)
+                    acknowledgedOn = str(acknowledgedOn.strftime('%m/%d/%Y %H:%M')) + ' UTC'
+                except:
+                    acknowledgedOn = eachItem['acknowledgedOn']
             else:
                 acknowledgedOn = ''
             contacts = ''
