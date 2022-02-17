@@ -1,5 +1,5 @@
 edgegrid-python==1.1.1
-requests==2.23.0
+requests==2.27.*
 prettytable==0.7.2
 configparser==3.5.0
 click==7.1.1
