@@ -28,7 +28,7 @@ from akamai.edgegrid import EdgeGridAuth, EdgeRc
 import dateutil.parser
 import click
 
-PACKAGE_VERSION = "0.2.2"
+PACKAGE_VERSION = "0.2.3"
 
 # Setup logging
 if not os.path.exists('logs'):
