@@ -5,3 +5,4 @@ configparser==3.5.0
 click==7.1.1
 urllib3==1.26.*
 chardet==3.0.4
+python-dateutil==2.8.2

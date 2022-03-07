@@ -6,13 +6,13 @@
     {
       "name": "firewall",
       "aliases": ["fw"],
-      "version": "0.2.2",
+      "version": "0.2.3",
       "description": "Access Akamai Firewall Rules Services, Subscriptions, and CIDRs"
     },
     {
       "name": "site-shield",
       "aliases": ["ss"],
-      "version": "0.2.2",
+      "version": "0.2.3",
       "description": "Access details of Site-Shield Maps, CIDRs and acknowledgement"
     }
   ]
